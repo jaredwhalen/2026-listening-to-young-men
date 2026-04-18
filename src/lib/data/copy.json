@@ -1,0 +1,16 @@
+{
+	"scroller": [
+		{
+			"id": "slide_0",
+			"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.\n\nDonec id elit non mi porta gravida at eget metus."
+		},
+		{
+			"id": "slide_1",
+			"text": "Aenean lacinia bibendum nulla sed consectetur. Maecenas faucibus mollis interdum.\n\nVestibulum id ligula porta felis euismod semper."
+		},
+		{
+			"id": "slide_2",
+			"text": "Curabitur blandit tempus porttitor. Etiam porta sem malesuada magna mollis euismod."
+		}
+	]
+}

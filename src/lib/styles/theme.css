@@ -1,0 +1,33 @@
+/**
+ * Design tokens. Host sites (e.g. Newspack / WordPress) can override via their own :root rules loaded earlier.
+ */
+:root {
+	--font-body: var(--theme-font-body, "Source Serif 4", "Georgia", serif);
+	--font-heading: var(--theme-font-heading, "Noto Sans", system-ui, sans-serif);
+
+	--color-primary: var(--theme-color-primary, #2563eb);
+	--color-primary-muted: var(--theme-color-primary-muted, #1d4ed8);
+	--color-accent: var(--theme-color-accent, #0d9488);
+	--color-accent-2: var(--theme-color-accent-2, #c2410c);
+
+	--color-text: var(--theme-color-text, #171717);
+	--color-text-muted: var(--theme-color-text-muted, #525252);
+	--color-surface: var(--theme-color-surface, #ffffff);
+	--color-border: var(--theme-color-border, #e5e5e5);
+
+	--color-black: #000000;
+	--color-white: #ffffff;
+	--color-gray-50: #fafafa;
+	--color-gray-100: #f5f5f5;
+	--color-gray-200: #e5e5e5;
+	--color-gray-300: #d4d4d4;
+	--color-gray-400: #a3a3a3;
+	--color-gray-500: #737373;
+	--color-gray-600: #525252;
+	--color-gray-700: #404040;
+	--color-gray-800: #262626;
+	--color-gray-900: #171717;
+
+	--layout-max-width: none;
+	--layout-padding-inline: 0px;
+}
