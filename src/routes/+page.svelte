@@ -1,6 +1,5 @@
 <script>
 	const routes = [
-		{ href: '/matrix-scrolly', label: 'Matrix (scrolly)' },
 		{ href: '/matrix', label: 'Matrix (inline)' },
 		{ href: '/waffle', label: 'Waffle' },
 		{ href: '/dotplot', label: 'Dot plot' },
