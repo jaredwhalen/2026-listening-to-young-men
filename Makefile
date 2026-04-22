@@ -10,7 +10,7 @@ github: sync-docs
 	git commit -m "update github pages"
 	git push
 
-github-embed:
+embed:
 	npm run build
 	npm run embed:all
 	$(MAKE) sync-docs
