@@ -197,6 +197,7 @@ CDN base: ${JSDELIVR_BASE_URL}
 
 ${cssLinks}
 
+<link rel="modulepreload" href="${JSDELIVR_BASE_URL}_app/env.js">
 ${modulepreloadFiles.map((file) => `<link rel="modulepreload" href="${JSDELIVR_BASE_URL}_app/immutable/${file}">`).join('\n')}
 
 <div ${containerAttributes()}>
@@ -208,14 +209,19 @@ ${modulepreloadFiles.map((file) => `<link rel="modulepreload" href="${JSDELIVR_B
 <script>
 (function () {
 	const BASE_URL = "${JSDELIVR_BASE_URL}";
-	window.${configVar} = { base: BASE_URL };
+	const kitConfig = { base: BASE_URL, env: null };
+	window.${configVar} = kitConfig;
 
 	const container = document.getElementById("${EMBED_CONTAINER_ID}");
 
-	Promise.all([
-		import(BASE_URL + '_app/immutable/entry/${startFile}'),
-		import(BASE_URL + '_app/immutable/entry/${appFile}')
-	])
+	import(BASE_URL + '_app/env.js')
+		.then(({ env }) => {
+			kitConfig.env = env;
+			return Promise.all([
+				import(BASE_URL + '_app/immutable/entry/${startFile}'),
+				import(BASE_URL + '_app/immutable/entry/${appFile}')
+			]);
+		})
 		.then(([kit, app]) => {
 			kit.start(app, container, {
 ${kitOptionsBody
