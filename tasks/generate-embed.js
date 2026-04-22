@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,41 +10,138 @@ const __dirname = dirname(__filename);
 import projectConfig from '../src/lib/config/project.config.js';
 
 const DIST_PATH = join(__dirname, '..', 'dist');
-const INDEX_HTML_PATH = join(DIST_PATH, 'index.html');
-const OUTPUT_PATH = join(__dirname, '..', 'wordpress-embed.html');
 
 const JSDELIVR_BASE_URL = projectConfig.build.cdnBaseUrl.replace(/\/?$/, '/');
 const EMBED_CONTAINER_ID = projectConfig.build.embedContainerId;
 
-function extractFileInfo(htmlContent) {
-	const cssMatch = htmlContent.match(/href="\.\/_app\/immutable\/assets\/([^"]+\.css)"/);
-	const cssFile = cssMatch ? cssMatch[1] : null;
+function printHelp() {
+	console.log(`Usage: node tasks/generate-embed.js [options]
+
+Options:
+  --route <path>   SvelteKit route to embed (default: /). Example: /waffle
+  --out <file>     Output HTML path (default: wordpress-embed.html for /, else wordpress-embed-<slug>.html)
+  -h, --help       Show this message
+
+Examples:
+  node tasks/generate-embed.js
+  node tasks/generate-embed.js --route /waffle
+  npm run build:embed -- --route /waffle
+
+Reads the matching prerendered file under dist/ (e.g. dist/index.html, dist/waffle.html) and copies
+hydration options (node_ids, data, …) from that file so the embed matches the route.
+`);
+}
+
+function parseArgs(argv) {
+	let route = '/';
+	let outPath = null;
+	for (let i = 0; i < argv.length; i++) {
+		const a = argv[i];
+		if (a === '-h' || a === '--help') return { help: true };
+		if (a === '--route' && argv[i + 1]) {
+			route = argv[++i];
+			continue;
+		}
+		if (a.startsWith('--route=')) {
+			route = a.slice('--route='.length);
+			continue;
+		}
+		if (a === '--out' && argv[i + 1]) {
+			outPath = argv[++i];
+			continue;
+		}
+		if (a.startsWith('--out=')) {
+			outPath = a.slice('--out='.length);
+			continue;
+		}
+		console.error(`Unknown argument: ${a}`);
+		return { error: true };
+	}
+	return { route, outPath };
+}
+
+/** Strip slashes; empty string means home `/`. */
+function routeToDistSegment(route) {
+	const s = String(route).trim().replace(/^\/+/, '').replace(/\/+$/g, '');
+	return s;
+}
+
+/**
+ * adapter-static writes flat HTML for many routes (e.g. dist/waffle.html) or nested index.html.
+ */
+function resolveDistHtmlPath(distPath, route) {
+	const segment = routeToDistSegment(route);
+	if (!segment) {
+		return join(distPath, 'index.html');
+	}
+	const flat = join(distPath, `${segment}.html`);
+	if (existsSync(flat)) return flat;
+	const nested = join(distPath, segment, 'index.html');
+	if (existsSync(nested)) return nested;
+	return null;
+}
+
+function defaultOutputPath(repoRoot, route) {
+	const segment = routeToDistSegment(route);
+	if (!segment) return join(repoRoot, 'wordpress-embed.html');
+	const slug = segment.replace(/\//g, '-');
+	return join(repoRoot, `wordpress-embed-${slug}.html`);
+}
+
+/** Third argument to kit.start(...) as trimmed source (node_ids, data, form, error). */
+function extractKitStartOptionsBody(htmlContent) {
+	const re = /kit\.start\(app,\s*\w+,\s*\{/;
+	const m = htmlContent.match(re);
+	if (!m) return null;
+	let i = m.index + m[0].length;
+	let depth = 1;
+	const bodyStart = i;
+	while (i < htmlContent.length && depth > 0) {
+		const c = htmlContent[i];
+		if (c === '{') depth++;
+		else if (c === '}') depth--;
+		i++;
+	}
+	if (depth !== 0) return null;
+	return htmlContent.slice(bodyStart, i - 1).trim();
+}
+
+function extractFileInfo(htmlContent, sourceLabel) {
+	const cssMatches = htmlContent.matchAll(/href="\.\/_app\/immutable\/assets\/([^"]+\.css)"/g);
+	const cssFiles = [...new Set(Array.from(cssMatches, (match) => match[1]))];
 
 	const modulepreloadMatches = htmlContent.matchAll(/href="\.\/_app\/immutable\/([^"]+\.js)"/g);
-	const modulepreloadFiles = Array.from(modulepreloadMatches).map((match) => match[1]);
+	const modulepreloadFiles = [...new Set(Array.from(modulepreloadMatches, (match) => match[1]))];
 
 	const startMatch = htmlContent.match(/import\("\.\/_app\/immutable\/entry\/([^"]+\.js)"\)/);
 	const appMatch = htmlContent.match(/import\("\.\/_app\/immutable\/entry\/([^"]+\.js)"\)/g);
 
 	const startFile = startMatch ? startMatch[1] : null;
 	const appFiles = appMatch
-		? appMatch.map((m) => m.match(/import\("\.\/_app\/immutable\/entry\/([^"]+\.js)"\)/)[1])
+		? appMatch.map((x) => x.match(/import\("\.\/_app\/immutable\/entry\/([^"]+\.js)"\)/)[1])
 		: [];
 	const appFile = appFiles[appFiles.length - 1];
 
 	const configMatch = htmlContent.match(/(__sveltekit_\w+)\s*=/);
 	if (!configMatch) {
-		console.error('❌ Could not find SvelteKit configuration variable in dist/index.html');
+		console.error(`❌ Could not find SvelteKit configuration variable in ${sourceLabel}`);
 		process.exit(1);
 	}
 	const configVar = configMatch[1];
 
+	const kitOptionsBody = extractKitStartOptionsBody(htmlContent);
+	if (!kitOptionsBody) {
+		console.error(`❌ Could not find kit.start(app, …, { … }) hydration block in ${sourceLabel}`);
+		process.exit(1);
+	}
+
 	return {
-		cssFile,
+		cssFiles,
 		modulepreloadFiles,
 		startFile,
 		appFile,
-		configVar
+		configVar,
+		kitOptionsBody
 	};
 }
 
@@ -57,19 +154,26 @@ function containerAttributes() {
 	return `id="${EMBED_CONTAINER_ID}" style="${styles.join(';')}"`;
 }
 
-function generateEmbedHTML(info) {
-	const { cssFile, modulepreloadFiles, startFile, appFile, configVar } = info;
+function generateEmbedHTML(info, meta) {
+	const { cssFiles, modulepreloadFiles, startFile, appFile, configVar, kitOptionsBody } = info;
+	const { route, distHtmlRelative } = meta;
+
+	const cssLinks = cssFiles
+		.map((file) => `<link href="${JSDELIVR_BASE_URL}_app/immutable/assets/${file}" rel="stylesheet">`)
+		.join('\n');
 
 	return `<!-- WordPress embed bundle (see src/lib/config/project.config.js → build) -->
 <!--
-1. npm run build:embed
+Route: ${route}
+Source: dist/${distHtmlRelative}
+1. npm run build:embed${route === '/' ? '' : ` -- --route ${route}`}
 2. Commit and push the dist/ folder (or your CDN source)
 3. Paste this block into a Custom HTML block
 
 CDN base: ${JSDELIVR_BASE_URL}
 -->
 
-<link href="${JSDELIVR_BASE_URL}_app/immutable/assets/${cssFile}" rel="stylesheet">
+${cssLinks}
 
 ${modulepreloadFiles.map((file) => `<link rel="modulepreload" href="${JSDELIVR_BASE_URL}_app/immutable/${file}">`).join('\n')}
 
@@ -92,10 +196,10 @@ ${modulepreloadFiles.map((file) => `<link rel="modulepreload" href="${JSDELIVR_B
 	])
 		.then(([kit, app]) => {
 			kit.start(app, container, {
-				node_ids: [0, 2],
-				data: [null, null],
-				form: null,
-				error: null
+${kitOptionsBody
+	.split(/\r?\n/)
+	.map((line) => '\t\t\t\t' + line.trim())
+	.join('\n')}
 			});
 		})
 		.catch((error) => {
@@ -107,20 +211,55 @@ ${modulepreloadFiles.map((file) => `<link rel="modulepreload" href="${JSDELIVR_B
 }
 
 function main() {
-	console.log('🔍 Checking for dist/index.html...');
-
-	if (!existsSync(INDEX_HTML_PATH)) {
-		console.error('❌ dist/index.html not found. Run "npm run build" first.');
+	const parsed = parseArgs(process.argv.slice(2));
+	if (parsed.help) {
+		printHelp();
+		process.exit(0);
+	}
+	if (parsed.error) {
+		printHelp();
 		process.exit(1);
 	}
 
-	const htmlContent = readFileSync(INDEX_HTML_PATH, 'utf-8');
-	const fileInfo = extractFileInfo(htmlContent);
-	const embedHTML = generateEmbedHTML(fileInfo);
+	const repoRoot = join(__dirname, '..');
+	const route = parsed.route.startsWith('/') ? parsed.route : `/${parsed.route}`;
+	const indexHtmlPath = resolveDistHtmlPath(DIST_PATH, route);
 
-	writeFileSync(OUTPUT_PATH, embedHTML);
+	console.log(`🔍 Resolving dist HTML for route "${route}"…`);
 
-	console.log('✅ wordpress-embed.html written');
+	if (!indexHtmlPath) {
+		const segment = routeToDistSegment(route);
+		console.error(
+			`❌ No prerendered HTML found for route "${route}". Tried dist/${segment}.html and dist/${segment}/index.html. Run "npm run build" first.`
+		);
+		process.exit(1);
+	}
+
+	const htmlContent = readFileSync(indexHtmlPath, 'utf-8');
+	const distHtmlRelative = indexHtmlPath.slice(DIST_PATH.length + 1);
+	const sourceLabel = `dist/${distHtmlRelative}`;
+	const fileInfo = extractFileInfo(htmlContent, sourceLabel);
+
+	if (!fileInfo.cssFiles.length) {
+		console.error(`❌ No stylesheet links found in ${sourceLabel}`);
+		process.exit(1);
+	}
+	if (!fileInfo.startFile || !fileInfo.appFile) {
+		console.error(`❌ Could not resolve entry chunks in ${sourceLabel}`);
+		process.exit(1);
+	}
+
+	const outputPath = parsed.outPath
+		? isAbsolute(parsed.outPath)
+			? parsed.outPath
+			: join(repoRoot, parsed.outPath)
+		: defaultOutputPath(repoRoot, route);
+	const embedHTML = generateEmbedHTML(fileInfo, { route, distHtmlRelative });
+
+	writeFileSync(outputPath, embedHTML);
+
+	console.log(`✅ ${outputPath.slice(repoRoot.length + 1)} written`);
+	console.log(`   Source: ${sourceLabel}`);
 	console.log(`   CDN: ${JSDELIVR_BASE_URL}`);
 	console.log(`   Container: #${EMBED_CONTAINER_ID}`);
 }
