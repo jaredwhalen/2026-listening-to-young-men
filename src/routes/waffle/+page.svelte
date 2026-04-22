@@ -82,7 +82,7 @@
 	};
 
 	const leadTypologies =
-		'For each typology: the first two columns are shares (heatmap); the gap is how much higher or lower their own share is than the society share they imagine (signed percentage points, shown in bold). Hover for detail.';
+	'Percent of young men who select each of the following as one of three traits they believe are most important for men today, and the percent difference in the traits they believe society values:';
 
 	let showNumbers = $state(true);
 	let traitColWidthDemographics = $state(null);
