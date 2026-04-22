@@ -3,12 +3,6 @@
   import { onMount } from "svelte";
   import { windowWidth, windowHeight } from "../stores/global.js";
 
-  /**
-   * @typedef {Object} Props
-   * @property {number} [debounceDur]
-   */
-
-  /** @type {Props} */
   let { debounceDur = 100 } = $props();
 
   const onResize = () => {

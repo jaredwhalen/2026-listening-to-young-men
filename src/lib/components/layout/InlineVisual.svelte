@@ -1,5 +1,4 @@
 <script>
-	/** @type {{ children?: import('svelte').Snippet; title?: import('svelte').Snippet; dek?: import('svelte').Snippet; note?: import('svelte').Snippet; class?: string }} */
 	let { children, title, dek, note, class: className = '' } = $props();
 </script>
 

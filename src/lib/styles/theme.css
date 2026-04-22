@@ -2,8 +2,9 @@
  * Design tokens. Host sites (e.g. Newspack / WordPress) can override via their own :root rules loaded earlier.
  */
 :root {
-	--font-body: var(--theme-font-body, "Source Serif 4", "Georgia", serif);
-	--font-heading: var(--theme-font-heading, "Noto Sans", system-ui, sans-serif);
+	/* Typography: serif for titles/headings, sans for body/chart UI */
+	--font-body: var(--theme-font-body, "Founders Grotesk", system-ui, sans-serif);
+	--font-heading: var(--theme-font-heading, "Feature", sans-serif);
 
 	--color-primary: var(--theme-color-primary, #2563eb);
 	--color-primary-muted: var(--theme-color-primary-muted, #1d4ed8);

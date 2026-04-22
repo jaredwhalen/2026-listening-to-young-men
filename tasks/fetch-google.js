@@ -4,11 +4,7 @@ import docs from "../google.config.js";
 import { camelCase } from 'change-case';
 const CWD = process.cwd();
 
-/**
- * Camel case all object keys. Modified from https://stackoverflow.com/a/41072596
- * @param {Object} input Object you want to mute
- * @returns Mutated object
- */
+/** Camel case all object keys. Modified from https://stackoverflow.com/a/41072596 */
 let objectKeysToLowerCase = function (input) {
 	if (typeof input !== 'object') return input;
 	if (Array.isArray(input)) return input.map(objectKeysToLowerCase);
