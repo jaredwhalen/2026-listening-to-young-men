@@ -21,7 +21,8 @@ const project = {
 	},
 
 	build: {
-		cdnBaseUrl: 'https://cdn.jsdelivr.net/gh/jaredwhalen/2026-listening-to-young-men@main/dist/', // published dist/ base; used by tasks/generate-embed.js (npm run setup)
+		cdnBaseUrl:
+			'https://cdn.jsdelivr.net/gh/jaredwhalen/2026-listening-to-young-men@main/docs/', // committed static build (dist/ is gitignored); used by tasks/generate-embed.js
 		embedContainerId: 'svelte-app-container' // DOM id for the WordPress embed mount node
 	}
 };

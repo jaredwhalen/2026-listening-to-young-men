@@ -9,7 +9,7 @@ node_modules
 /build
 /dist
 
-# Auto-generated embed files (keep dist/ for GitHub hosting)
+# Auto-generated WordPress embed snippets (regenerate with npm run build && node tasks/generate-embed.js)
 wordpress-embed.html
 wordpress-embed-*.html
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join, dirname, isAbsolute } from 'path';
+import { join, dirname, isAbsolute, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,7 +9,9 @@ const __dirname = dirname(__filename);
 
 import projectConfig from '../src/lib/config/project.config.js';
 
-const DIST_PATH = join(__dirname, '..', 'dist');
+const REPO_ROOT = join(__dirname, '..');
+const DIST_PATH = join(REPO_ROOT, 'dist');
+const DOCS_PATH = join(REPO_ROOT, 'docs');
 
 const JSDELIVR_BASE_URL = projectConfig.build.cdnBaseUrl.replace(/\/?$/, '/');
 const EMBED_CONTAINER_ID = projectConfig.build.embedContainerId;
@@ -27,8 +29,8 @@ Examples:
   node tasks/generate-embed.js --route /waffle
   npm run build:embed -- --route /waffle
 
-Reads the matching prerendered file under dist/ (e.g. dist/index.html, dist/waffle.html) and copies
-hydration options (node_ids, data, …) from that file so the embed matches the route.
+Reads the matching prerendered HTML from dist/ after a local build, or from docs/ if dist/ is missing
+(e.g. fresh clone). Chunk hashes must match what you commit under docs/ for the CDN (see project.config.js → build.cdnBaseUrl).
 `);
 }
 
@@ -67,17 +69,37 @@ function routeToDistSegment(route) {
 }
 
 /**
- * adapter-static writes flat HTML for many routes (e.g. dist/waffle.html) or nested index.html.
+ * adapter-static writes flat HTML for many routes (e.g. waffle.html) or nested index.html.
  */
-function resolveDistHtmlPath(distPath, route) {
+function resolveDistHtmlPath(baseDir, route) {
 	const segment = routeToDistSegment(route);
 	if (!segment) {
-		return join(distPath, 'index.html');
+		const indexPath = join(baseDir, 'index.html');
+		return existsSync(indexPath) ? indexPath : null;
 	}
-	const flat = join(distPath, `${segment}.html`);
+	const flat = join(baseDir, `${segment}.html`);
 	if (existsSync(flat)) return flat;
-	const nested = join(distPath, segment, 'index.html');
+	const nested = join(baseDir, segment, 'index.html');
 	if (existsSync(nested)) return nested;
+	return null;
+}
+
+/** Prefer fresh dist/; fall back to committed docs/ so embed generation works without a local build. */
+function resolveBuiltHtmlPath(route) {
+	const fromDist = resolveDistHtmlPath(DIST_PATH, route);
+	if (fromDist) {
+		return {
+			abs: fromDist,
+			label: relative(REPO_ROOT, fromDist).replace(/\\/g, '/')
+		};
+	}
+	const fromDocs = resolveDistHtmlPath(DOCS_PATH, route);
+	if (fromDocs) {
+		return {
+			abs: fromDocs,
+			label: relative(REPO_ROOT, fromDocs).replace(/\\/g, '/')
+		};
+	}
 	return null;
 }
 
@@ -156,7 +178,7 @@ function containerAttributes() {
 
 function generateEmbedHTML(info, meta) {
 	const { cssFiles, modulepreloadFiles, startFile, appFile, configVar, kitOptionsBody } = info;
-	const { route, distHtmlRelative } = meta;
+	const { route, sourceHtmlRelative } = meta;
 
 	const cssLinks = cssFiles
 		.map((file) => `<link href="${JSDELIVR_BASE_URL}_app/immutable/assets/${file}" rel="stylesheet">`)
@@ -165,9 +187,9 @@ function generateEmbedHTML(info, meta) {
 	return `<!-- WordPress embed bundle (see src/lib/config/project.config.js → build) -->
 <!--
 Route: ${route}
-Source: dist/${distHtmlRelative}
+Source: ${sourceHtmlRelative}
 1. npm run build:embed${route === '/' ? '' : ` -- --route ${route}`}
-2. Commit and push the dist/ folder (or your CDN source)
+2. Commit and push the static build your CDN serves (this repo: copy dist/ → docs/, then commit docs/)
 3. Paste this block into a Custom HTML block
 
 CDN base: ${JSDELIVR_BASE_URL}
@@ -204,7 +226,7 @@ ${kitOptionsBody
 		})
 		.catch((error) => {
 			console.error('Svelte app failed to load:', error);
-			container.innerHTML = '<p>Error loading app. Check the CDN URL in src/lib/config/project.config.js and that dist/ is published.</p>';
+			container.innerHTML = '<p>Error loading app. Check the CDN URL in src/lib/config/project.config.js (build.cdnBaseUrl) and that the committed static files (e.g. docs/) match this embed.</p>';
 		});
 })();
 </script>`;
@@ -221,23 +243,23 @@ function main() {
 		process.exit(1);
 	}
 
-	const repoRoot = join(__dirname, '..');
+	const repoRoot = REPO_ROOT;
 	const route = parsed.route.startsWith('/') ? parsed.route : `/${parsed.route}`;
-	const indexHtmlPath = resolveDistHtmlPath(DIST_PATH, route);
 
-	console.log(`🔍 Resolving dist HTML for route "${route}"…`);
+	const built = resolveBuiltHtmlPath(route);
 
-	if (!indexHtmlPath) {
+	console.log(`🔍 Resolving built HTML for route "${route}"…`);
+
+	if (!built) {
 		const segment = routeToDistSegment(route);
 		console.error(
-			`❌ No prerendered HTML found for route "${route}". Tried dist/${segment}.html and dist/${segment}/index.html. Run "npm run build" first.`
+			`❌ No prerendered HTML for "${route}". Tried dist/ and docs/ (${segment}.html or ${segment}/index.html). Run "npm run build", or sync dist → docs.`
 		);
 		process.exit(1);
 	}
 
-	const htmlContent = readFileSync(indexHtmlPath, 'utf-8');
-	const distHtmlRelative = indexHtmlPath.slice(DIST_PATH.length + 1);
-	const sourceLabel = `dist/${distHtmlRelative}`;
+	const htmlContent = readFileSync(built.abs, 'utf-8');
+	const sourceLabel = built.label;
 	const fileInfo = extractFileInfo(htmlContent, sourceLabel);
 
 	if (!fileInfo.cssFiles.length) {
@@ -254,11 +276,13 @@ function main() {
 			? parsed.outPath
 			: join(repoRoot, parsed.outPath)
 		: defaultOutputPath(repoRoot, route);
-	const embedHTML = generateEmbedHTML(fileInfo, { route, distHtmlRelative });
+	const embedHTML = generateEmbedHTML(fileInfo, { route, sourceHtmlRelative: built.label });
 
 	writeFileSync(outputPath, embedHTML);
 
-	console.log(`✅ ${outputPath.slice(repoRoot.length + 1)} written`);
+	const outRel = relative(repoRoot, outputPath);
+	const outLog = outRel.startsWith('..') || isAbsolute(outRel) ? outputPath : outRel;
+	console.log(`✅ ${outLog} written`);
 	console.log(`   Source: ${sourceLabel}`);
 	console.log(`   CDN: ${JSDELIVR_BASE_URL}`);
 	console.log(`   Container: #${EMBED_CONTAINER_ID}`);
