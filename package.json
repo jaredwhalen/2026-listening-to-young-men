@@ -28,6 +28,7 @@
 		"change-case": "^5.4.4",
 		"d3": "^7.9.0",
 		"lodash.debounce": "^4.0.8",
+		"lucide-svelte": "^1.0.1",
 		"mapbox-gl": "^3.15.0",
 		"sass": "^1.93.2",
 		"tippy.js": "^6.3.7",

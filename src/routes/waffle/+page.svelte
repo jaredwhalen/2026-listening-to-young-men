@@ -4,7 +4,7 @@
 	import TypologyDiffHeatmap from '$lib/visuals/waffle/TypologyDiffHeatmap.svelte';
 	import { buildTypologyCompareRows, TYPOLOGY_COMPARE_COLUMNS } from '$lib/visuals/waffle/buildTypologyCompareRows.js';
 	import { parseWaffleCsv } from '$lib/visuals/waffle/parseWaffleCsv.js';
-	import waffleRaw from '$lib/data/waffle.csv?raw';
+	import waffleRows from '$lib/data/waffle.csv';
 	import copy from '$lib/data/copy.json';
 
 	const VIEW_MODE = {
@@ -25,7 +25,7 @@
 	let innerWidth = $state(0);
 	let isDesktop = $derived(innerWidth >= 980);
 
-	const parsed = parseWaffleCsv(waffleRaw);
+	const parsed = parseWaffleCsv(waffleRows);
 
 	const DEMOS = [
 		'All Americans',

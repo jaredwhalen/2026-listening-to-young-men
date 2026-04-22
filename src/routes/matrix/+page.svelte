@@ -1,17 +1,36 @@
 <script>
 	import InlineVisual from '$lib/components/layout/InlineVisual.svelte';
+	import TypologyQuadGrid from '$lib/visuals/matrix/TypologyQuadGrid.svelte';
+	import { parseTypologyCsv } from '$lib/visuals/matrix/parseTypologyCsv.js';
+	import { matrixTypologyCopy } from '$lib/data/matrixTypologyCopy.js';
+	import typologyRows from '$lib/data/typology.csv';
+	import copy from '$lib/data/copy.json';
+
+	const parsed = parseTypologyCsv(typologyRows);
 </script>
 
 <svelte:head>
-	<title>Matrix · inline</title>
+	<title>Matrix · typology</title>
 </svelte:head>
 
 <div class="page-inner">
 	<InlineVisual>
-		{#snippet title()}Typology matrix{/snippet}
-		{#snippet dek()}Placeholder route for the typology matrix.{/snippet}
+		{#snippet title()}{copy.charts.matrix.title || ''}{/snippet}
+		{#snippet dek()}{copy.charts.matrix.description || ''}{/snippet}
 		{#snippet children()}
-			<div class="placeholder" role="status">Chart mount point</div>
+			{#if parsed.ok}
+				<TypologyQuadGrid
+					quadrants={parsed.quadrants}
+					columnPcts={parsed.columnPcts}
+					rowPcts={parsed.rowPcts}
+					copy={matrixTypologyCopy}
+				/>
+			{:else}
+				<p class="err" role="alert">Could not load typology data: {parsed.error}</p>
+			{/if}
+		{/snippet}
+		{#snippet note()}
+			{copy.charts.matrix.note || ''}
 		{/snippet}
 	</InlineVisual>
 </div>
@@ -22,16 +41,9 @@
 		padding-block: 1.5rem 2rem;
 	}
 
-	.placeholder {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 12rem;
-		border: 1px dashed var(--color-border);
-		border-radius: 0.5rem;
+	.err {
+		margin: 0;
 		font-family: var(--font-body);
-		font-size: 0.95rem;
-		color: var(--color-text-muted);
-		background: var(--color-surface);
+		color: var(--color-danger);
 	}
 </style>

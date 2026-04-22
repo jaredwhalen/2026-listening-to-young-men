@@ -1,8 +1,10 @@
-import { csvParse } from 'd3-dsv';
-
-function isProbablyHtml(raw) {
-	const s = String(raw ?? '').trimStart().toLowerCase();
-	return s.startsWith('<!doctype html') || s.startsWith('<html') || s.startsWith('<style');
+function isProbablyHtmlRow(row) {
+	const blob = Object.values(row ?? {})
+		.map((v) => String(v ?? ''))
+		.join(' ')
+		.trimStart()
+		.toLowerCase();
+	return blob.startsWith('<!doctype html') || blob.startsWith('<html') || blob.startsWith('<style');
 }
 
 function toNumberMaybe(v) {
@@ -13,13 +15,16 @@ function toNumberMaybe(v) {
 	return Number.isFinite(n) ? n : null;
 }
 
-/** Parse `waffle.csv`: `table`, `trait`, then demo columns (numeric values). */
-export function parseWaffleCsv(rawCsv) {
-	if (typeof rawCsv !== 'string' || rawCsv.trim().length === 0) {
-		return { ok: false, error: '`waffle.csv` is empty or missing.' };
+/**
+ * Shape `waffle.csv` into rows/tables/columns for charts.
+ * @param {Record<string, string>[]} rows from `import waffle from '.../waffle.csv'` (@rollup/plugin-dsv)
+ */
+export function parseWaffleCsv(rows) {
+	if (!Array.isArray(rows) || rows.length === 0) {
+		return { ok: false, error: '`waffle.csv` is empty or not an array (check @rollup/plugin-dsv import).' };
 	}
 
-	if (isProbablyHtml(rawCsv)) {
+	if (isProbablyHtmlRow(rows[0])) {
 		return {
 			ok: false,
 			error:
@@ -27,17 +32,7 @@ export function parseWaffleCsv(rawCsv) {
 		};
 	}
 
-	let parsed;
-	try {
-		parsed = csvParse(rawCsv);
-	} catch (e) {
-		return {
-			ok: false,
-			error: `Could not parse CSV: ${e instanceof Error ? e.message : String(e)}`
-		};
-	}
-
-	const cols = parsed.columns ?? [];
+	const cols = Object.keys(rows[0]);
 	if (!cols.includes('table') || !cols.includes('trait')) {
 		return {
 			ok: false,
@@ -47,7 +42,7 @@ export function parseWaffleCsv(rawCsv) {
 
 	const demoColumns = cols.filter((c) => c !== 'table' && c !== 'trait');
 
-	const rows = parsed
+	const parsedRows = rows
 		.map((d) => {
 			const table = String(d.table ?? '').trim();
 			const trait = String(d.trait ?? '').trim();
@@ -57,9 +52,8 @@ export function parseWaffleCsv(rawCsv) {
 		})
 		.filter((r) => r.table && r.trait);
 
-	const tables = Array.from(new Set(rows.map((r) => r.table)));
-	const traitOrder = Array.from(new Set(rows.map((r) => r.trait)));
+	const tables = Array.from(new Set(parsedRows.map((r) => r.table)));
+	const traitOrder = Array.from(new Set(parsedRows.map((r) => r.trait)));
 
-	return { ok: true, rows, tables, columns: demoColumns, traitOrder };
+	return { ok: true, rows: parsedRows, tables, columns: demoColumns, traitOrder };
 }
-

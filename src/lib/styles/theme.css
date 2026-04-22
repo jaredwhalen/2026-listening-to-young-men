@@ -1,33 +1,51 @@
 /**
- * Design tokens. Host sites (e.g. Newspack / WordPress) can override via their own :root rules loaded earlier.
+ * Design tokens — Public Agenda palette (Brand Guide & Assets, Summer 2023).
+ * Host sites (e.g. Newspack / WordPress) can override via --theme-* on :root loaded earlier.
  */
 :root {
+	/* Brand primitives (hex from guide; use --theme-* below for semantic roles) */
+	--pa-primary-teal: #318793;
+	--pa-red: #ff6364;
+	--pa-orange: #de6a40;
+	--pa-gold: #f9cb6c;
+	--pa-purple: #b34cdb;
+	--pa-green: #5bb785;
+	--pa-light-blue: #38aad6;
+	--pa-blue: #2f2ca8;
+	--pa-black: #171717;
+	--pa-gray-medium: #c5c5c5;
+	--pa-gray-light: #f3f3f3;
+	--pa-white: #ffffff;
+
 	/* Typography: serif for titles/headings, sans for body/chart UI */
 	--font-body: var(--theme-font-body, "Founders Grotesk", system-ui, sans-serif);
 	--font-heading: var(--theme-font-heading, "Feature", sans-serif);
 
-	--color-primary: var(--theme-color-primary, #2563eb);
-	--color-primary-muted: var(--theme-color-primary-muted, #1d4ed8);
-	--color-accent: var(--theme-color-accent, #0d9488);
-	--color-accent-2: var(--theme-color-accent-2, #c2410c);
+	/* Semantic colors (defaults = Public Agenda) */
+	--color-primary: var(--theme-color-primary, var(--pa-primary-teal));
+	--color-primary-muted: var(--theme-color-primary-muted, #276f7a);
+	--color-accent: var(--theme-color-accent, var(--pa-light-blue));
+	--color-accent-2: var(--theme-color-accent-2, var(--pa-orange));
 
-	--color-text: var(--theme-color-text, #171717);
-	--color-text-muted: var(--theme-color-text-muted, #525252);
-	--color-surface: var(--theme-color-surface, #ffffff);
-	--color-border: var(--theme-color-border, #e5e5e5);
+	--color-text: var(--theme-color-text, var(--pa-black));
+	--color-text-muted: var(--theme-color-text-muted, #4a4a4a);
+	--color-surface: var(--theme-color-surface, var(--pa-white));
+	--color-border: var(--theme-color-border, var(--pa-gray-medium));
+
+	--color-danger: var(--theme-color-danger, var(--pa-red));
 
 	--color-black: #000000;
-	--color-white: #ffffff;
-	--color-gray-50: #fafafa;
-	--color-gray-100: #f5f5f5;
-	--color-gray-200: #e5e5e5;
-	--color-gray-300: #d4d4d4;
-	--color-gray-400: #a3a3a3;
+	--color-white: var(--pa-white);
+	--color-gray-50: var(--pa-gray-light);
+	--color-gray-100: #ececec;
+	--color-gray-200: #dedede;
+	--color-gray-300: var(--pa-gray-medium);
+	--color-gray-400: #9a9a9a;
 	--color-gray-500: #737373;
-	--color-gray-600: #525252;
+	--color-gray-600: #5c5c5c;
 	--color-gray-700: #404040;
-	--color-gray-800: #262626;
-	--color-gray-900: #171717;
+	--color-gray-800: #2a2a2a;
+	--color-gray-900: var(--pa-black);
 
 	--layout-max-width: none;
 	--layout-padding-inline: 0px;
