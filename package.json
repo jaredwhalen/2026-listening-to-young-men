@@ -7,6 +7,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"build:embed": "npm run build && node tasks/generate-embed.js",
+		"embed:all": "node tasks/generate-embed.js && node tasks/generate-embed.js --route /waffle && node tasks/generate-embed.js --route /matrix && node tasks/generate-embed.js --route /dotplot && node tasks/generate-embed.js --route /dotplot-interactive",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"gdoc": "node tasks/fetch-google.js",
