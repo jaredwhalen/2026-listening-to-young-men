@@ -12,5 +12,10 @@ export default [
 		"id": "1N1nvvu7YW323MGdT8oEkWaApujDWOhZzqjb5MTGI_30",
 		"gid": "2096051119",
 		"filepath": "src/lib/data/typology.csv"
+	},
+	{
+		"id": "1N1nvvu7YW323MGdT8oEkWaApujDWOhZzqjb5MTGI_30",
+		"gid": "1682152827",
+		"filepath": "src/lib/data/questions.csv"
 	}
 ]
