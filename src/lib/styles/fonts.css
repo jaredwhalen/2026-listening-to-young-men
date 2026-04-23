@@ -1,0 +1,28 @@
+/**
+ * Self-hosted brand fonts (served from /fonts/* → static/fonts/).
+ * Names match --font-body / --font-heading stacks in theme.css.
+ */
+
+@font-face {
+	font-family: 'Founders Grotesk';
+	src: url('/fonts/FoundersGrotesk-Regular.otf') format('opentype');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Founders Grotesk';
+	src: url('/fonts/founders-grotesk-semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Feature';
+	src: url('/fonts/FeatureDisplay-Medium-Web.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}

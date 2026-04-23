@@ -1,5 +1,6 @@
 <script>
 	import favicon from '$lib/assets/favicon.svg';
+	import '$lib/styles/fonts.css';
 	import '$lib/styles/theme.css';
 	import project from '$lib/config/project.js';
 	import CdnPrefetch from '$lib/components/CdnPrefetch.svelte';
