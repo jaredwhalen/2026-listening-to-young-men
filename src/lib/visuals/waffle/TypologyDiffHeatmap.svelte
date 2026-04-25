@@ -251,6 +251,7 @@
 		return wrap;
 	}
 
+
 	function measureTraitWidth() {
 		if (!heatmapEl) return;
 		const els = heatmapEl.querySelectorAll('.trait');

@@ -18,7 +18,9 @@ export function tippyTooltip(node, params) {
 			delay: [80, 0],
 			offset: [0, 10],
 			maxWidth: 320,
-			appendTo: () => document.body,
+			// Default to local placement to avoid stacked-layout coordinate weirdness.
+			// Can still be overridden by passing `options.appendTo`.
+			appendTo: () => node.parentElement ?? document.body,
 			plugins: [followCursor],
 			// Popper modifiers (edge-aware)
 			popperOptions: {

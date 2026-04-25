@@ -201,6 +201,7 @@
 		return wrap;
 	}
 
+
 	function measureHeaderHeight() {
 		if (!headersEl) return;
 		const labels = headersEl.querySelectorAll('.col-header-text');
