@@ -1,5 +1,7 @@
 <script>
+	import { scaleLinear } from 'd3-scale';
 	import { TYPOLOGY_VALUE_KEYS } from './parseQuestionsCsv.js';
+	import { tippyTooltip } from '$lib/utils/tippy.js';
 
 	/**
 	 * @type {{
@@ -18,21 +20,35 @@
 		colorB = 'var(--pa-primary-teal)'
 	} = $props();
 
-	/** ViewBox width — scales with container; generous label column avoids clipping. */
-	const W = 880;
-	const padL = 218;
+	let containerW = $state(0);
+	let labelW = $state(0);
+
+	/**
+	 * Fixed font sizes (CSS px). We keep fonts stable; the *layout* responds.
+	 * This is achieved by drawing in a pixel-based SVG (no viewBox scaling).
+	 */
 	const padR = 16;
-	const rowH = 46;
+	const padLMin = 170;
+
+	const W = $derived(Math.max(320, containerW || 0));
+	const rowH = 54;
 	const padB = 20;
-	const chartW = W - padL - padR;
+	const longestLabel = $derived.by(() => {
+		let best = '';
+		for (const s of typologyLabels) if ((s?.length ?? 0) > best.length) best = s ?? '';
+		return best;
+	});
+
+	const padL = $derived(Math.max(padLMin, Math.ceil(labelW + 18)));
+	const chartW = $derived(Math.max(10, W - padL - padR));
 
 	const legendPadTop = 10;
 	const legendPadBottom = 10;
 	const legendBlockGap = 8;
-	const legendLh = 13;
+	const legendLh = 16;
 	const legendTextX = 22;
 	const legendSwatchX = 9;
-	const legendSwatchR = 5;
+	const legendSwatchR = 6;
 	const ruleAfterLegend = 10;
 
 	/**
@@ -73,14 +89,8 @@
 	 * @param {number} maxChars
 	 */
 	function legendRows(qId, text, maxChars) {
-		const prefix = `${qId} · `;
-		const wrapped = wrapLines(prefix + text, maxChars);
-		return wrapped.map((ln, i) => {
-			if (i === 0 && ln.startsWith(prefix)) {
-				return { lead: qId, rest: ln.slice(prefix.length) };
-			}
-			return { lead: null, rest: ln };
-		});
+		const wrapped = wrapLines(text, maxChars);
+		return wrapped.map((ln) => ({ lead: null, rest: ln }));
 	}
 
 	const legendMaxChars = $derived(Math.floor((W - legendTextX - 8) / 6.8));
@@ -105,8 +115,19 @@
 	const swatchCyB = $derived(blockBTop + (rowsB.length * legendLh) / 2);
 
 	/** Connector thickness in user units — same for every row. */
-	const connectorStroke = 4;
-	const dotR = 5;
+	const connectorStroke = 3.5;
+	const dotR = 6.5;
+
+	/**
+	 * Labels sometimes arrive with numbered prefixes (e.g. "1. Foo").
+	 * Keep the layout, but display the clean text.
+	 * @param {string} s
+	 */
+	function displayLabel(s) {
+		return String(s ?? '').replace(/^\s*\d+\s*[\.\)\-:]\s*/u, '');
+	}
+
+	const x = $derived(scaleLinear().domain([0, 1]).range([padL, padL + chartW]));
 
 	const rows = $derived(
 		typologyLabels.map((label, i) => {
@@ -115,15 +136,15 @@
 			const pctA = a * 100;
 			const pctB = b * 100;
 			const diff = pctB - pctA;
-			const xA = padL + a * chartW;
-			const xB = padL + b * chartW;
+			const xA = x(a);
+			const xB = x(b);
 			const y = chartTop + i * rowH + rowH / 2;
 			const xLeft = Math.min(xA, xB);
 			const xRight = Math.max(xA, xB);
 			const colorLeft = xA <= xB ? colorA : colorB;
 			const colorRight = xA <= xB ? colorB : colorA;
 			return {
-				label,
+				label: displayLabel(label),
 				i,
 				a,
 				b,
@@ -143,34 +164,35 @@
 	);
 
 	const ticks = [0, 0.25, 0.5, 0.75, 1];
+
+	const percentFmt = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
+	function fmtPct(v) {
+		return `${percentFmt.format((v ?? 0) * 100)}%`;
+	}
+
+	function dotTooltipContent(typologyLabel, seriesLabel, pctText) {
+		const wrap = document.createElement('div');
+		const title = document.createElement('div');
+		title.className = 'everviz-tooltip-title';
+		title.textContent = typologyLabel;
+		const body = document.createElement('div');
+		body.textContent = `${seriesLabel}: ${pctText}`;
+		wrap.append(title, body);
+		return wrap;
+	}
 </script>
 
-<div class="dumbbell-board" style:max-width="{W}px">
+<div class="dumbbell-board" bind:clientWidth={containerW}>
+	<span class="dumbbell-label-measure" bind:clientWidth={labelW} aria-hidden="true"
+		>{longestLabel}</span
+	>
 	<svg
 		class="dumbbell-svg"
-		viewBox="0 0 {W} {svgHeight}"
-		preserveAspectRatio="xMinYMid meet"
+		width={W}
+		height={svgHeight}
 		role="img"
 		aria-label="Share of young men agreeing, by typology, for two survey questions"
 	>
-		<title>Typology dumbbell comparison</title>
-
-		<defs>
-			{#each rows as r (r.i)}
-				<linearGradient
-					id="dumbbell-conn-grad-{r.i}"
-					gradientUnits="userSpaceOnUse"
-					x1={r.xLeft}
-					y1={r.y}
-					x2={r.xRight}
-					y2={r.y}
-				>
-					<stop offset="0%" stop-color={r.colorLeft} />
-					<stop offset="100%" stop-color={r.colorRight} />
-				</linearGradient>
-			{/each}
-		</defs>
-
 		<g class="dumbbell-legend" aria-label="Questions compared in this chart">
 			<circle
 				cx={legendSwatchX}
@@ -187,9 +209,7 @@
 					y={legendPadTop + (i + 0.5) * legendLh}
 					dominant-baseline="middle"
 				>
-					{#if row.lead}
-						<tspan class="dumbbell-legend-id">{row.lead}</tspan><tspan class="dumbbell-legend-sep"> · </tspan>
-					{/if}<tspan>{row.rest}</tspan>
+					<tspan>{row.rest}</tspan>
 				</text>
 			{/each}
 
@@ -208,9 +228,7 @@
 					y={blockBTop + (i + 0.5) * legendLh}
 					dominant-baseline="middle"
 				>
-					{#if row.lead}
-						<tspan class="dumbbell-legend-id">{row.lead}</tspan><tspan class="dumbbell-legend-sep"> · </tspan>
-					{/if}<tspan>{row.rest}</tspan>
+					<tspan>{row.rest}</tspan>
 				</text>
 			{/each}
 		</g>
@@ -226,9 +244,17 @@
 		/>
 
 		{#each ticks as t (t)}
-			{@const x = padL + t * chartW}
-			<line class="dumbbell-tick-line" x1={x} y1={chartTop - 6} x2={x} y2={svgHeight - padB} />
-			<text class="dumbbell-tick-label" x={x} y={svgHeight - 4} text-anchor="middle">{Math.round(t * 100)}%</text>
+			{@const tx = x(t)}
+			<line
+				class="dumbbell-tick-line"
+				x1={tx}
+				y1={chartTop - 6}
+				x2={tx}
+				y2={svgHeight - padB}
+			/>
+			<text class="dumbbell-tick-label" x={tx} y={svgHeight - 4} text-anchor="middle"
+				>{Math.round(t * 100)}%</text
+			>
 		{/each}
 
 		{#each rows as r (r.i)}
@@ -243,7 +269,7 @@
 						y1={r.y}
 						x2={r.xB}
 						y2={r.y}
-						stroke="url(#dumbbell-conn-grad-{r.i})"
+						class="dumbbell-connector"
 						stroke-width={connectorStroke}
 						stroke-linecap="round"
 					/>
@@ -256,7 +282,13 @@
 					r={dotR}
 					fill={colorA}
 					stroke="var(--color-surface)"
-					stroke-width="1"
+					stroke-width="1.5"
+					use:tippyTooltip={{
+						getContent: () =>
+							dotTooltipContent(r.label, questionA.text, fmtPct(r.a)),
+						accentColor: colorA,
+						options: { followCursor: true, touch: ['hold', 400] }
+					}}
 				/>
 				<circle
 					class="dumbbell-dot"
@@ -265,10 +297,16 @@
 					r={dotR}
 					fill={colorB}
 					stroke="var(--color-surface)"
-					stroke-width="1"
+					stroke-width="1.5"
+					use:tippyTooltip={{
+						getContent: () =>
+							dotTooltipContent(r.label, questionB.text, fmtPct(r.b)),
+						accentColor: colorB,
+						options: { followCursor: true, touch: ['hold', 400] }
+					}}
 				/>
 
-				<text class="dumbbell-delta" x={r.cx} y={r.y - 14} text-anchor="middle">
+				<text class="dumbbell-delta" x={r.cx} y={r.y - 16} text-anchor="middle">
 					{r.diff >= 0 ? '+' : ''}{r.diff.toFixed(0)} pts
 				</text>
 			</g>
@@ -282,50 +320,68 @@
 		width: 100%;
 		min-width: 0;
 		margin-inline: auto;
+		/* Prevent mobile browsers from auto-scaling text */
+		text-size-adjust: 100%;
+		-webkit-text-size-adjust: 100%;
+		position: relative;
 	}
 
 	.dumbbell-svg {
 		width: 100%;
 		height: auto;
 		display: block;
-		font-family: var(--font-body);
+		font-family: var(--chart-font-body, var(--font-body));
+		max-width: none;
+	}
+
+	.dumbbell-label-measure {
+		position: absolute;
+		visibility: hidden;
+		pointer-events: none;
+		left: -9999px;
+		top: -9999px;
+		white-space: nowrap;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-md, 14.5px);
+		font-weight: var(--chart-weight-semibold, 650);
+		line-height: 1;
 	}
 
 	.dumbbell-legend-text {
-		fill: var(--color-text);
-		font-size: 12px;
+		fill: var(--chart-text, var(--color-text));
+		font-size: var(--chart-fs-sm, 12.5px);
 		line-height: 1.25;
 	}
 
-	.dumbbell-legend-id {
-		font-weight: 700;
-	}
-
-	.dumbbell-legend-sep {
-		fill: var(--color-text-muted);
-		font-weight: 500;
-	}
-
 	.dumbbell-tick-line {
-		stroke: var(--color-border);
+		stroke: var(--chart-grid, color-mix(in srgb, var(--color-border) 70%, transparent));
 		stroke-width: 1;
 	}
 
 	.dumbbell-tick-label {
-		fill: var(--color-text-muted);
-		font-size: 11px;
+		fill: var(--chart-muted, var(--color-text-muted));
+		font-size: var(--chart-fs-xs, 11px);
 	}
 
 	.dumbbell-row-label {
-		fill: var(--color-text);
-		font-size: 12px;
-		font-weight: 600;
+		fill: var(--chart-text, var(--color-text));
+		font-size: var(--chart-fs-md, 14.5px);
+		font-weight: var(--chart-weight-semibold, 650);
 	}
 
 	.dumbbell-delta {
-		fill: var(--color-text-muted);
-		font-size: 10px;
-		font-weight: 600;
+		fill: var(--chart-muted, var(--color-text-muted));
+		font-size: var(--chart-fs-xs, 11px);
+		font-weight: var(--chart-weight-semibold, 650);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.dumbbell-legend-rule {
+		stroke: var(--chart-grid-strong, color-mix(in srgb, var(--color-border) 90%, transparent));
+	}
+
+	.dumbbell-connector {
+		stroke: var(--chart-grid-strong, color-mix(in srgb, var(--color-border) 90%, transparent));
+		opacity: 0.95;
 	}
 </style>

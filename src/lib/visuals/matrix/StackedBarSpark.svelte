@@ -105,8 +105,8 @@
 	}
 
 	.seg-pct {
-		font-family: var(--font-body);
-		font-size: clamp(0.65rem, 1.1vw, 0.78rem);
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		font-weight: 500;
 		font-variant-numeric: tabular-nums;
 		line-height: 1;

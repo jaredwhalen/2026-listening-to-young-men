@@ -153,7 +153,7 @@
 		--matrix-heading-soft: var(--color-primary-muted);
 		--matrix-emphasis: var(--color-accent);
 		--matrix-surface: var(--color-gray-50);
-		--matrix-border: var(--color-border);
+		--matrix-border: var(--chart-border, var(--color-border));
 		--matrix-col-gap: 0.75rem;
 
 		width: 100%;
@@ -175,9 +175,9 @@
 	}
 
 	.axis-x-label {
-		font-family: var(--font-heading);
-		font-size: clamp(0.8rem, 1.8vw, 0.95rem);
-		font-weight: 650;
+		font-family: var(--chart-font-heading, var(--font-heading));
+		font-size: var(--chart-fs-sm, 12.5px);
+		font-weight: var(--chart-weight-semibold, 650);
 		color: var(--matrix-heading);
 		text-align: center;
 		line-height: 1.25;
@@ -185,7 +185,7 @@
 
 	.axis-pct {
 		font-weight: 550;
-		color: var(--color-text-muted);
+		color: var(--chart-muted, var(--color-text-muted));
 		font-size: 0.9em;
 	}
 
@@ -211,9 +211,9 @@
 	}
 
 	.axis-y-label {
-		font-family: var(--font-heading);
-		font-size: clamp(0.72rem, 1.5vw, 0.85rem);
-		font-weight: 650;
+		font-family: var(--chart-font-heading, var(--font-heading));
+		font-size: var(--chart-fs-sm, 12.5px);
+		font-weight: var(--chart-weight-semibold, 650);
 		color: var(--matrix-heading);
 		writing-mode: vertical-rl;
 		transform: rotate(180deg);
@@ -244,12 +244,6 @@
 		justify-content: space-between;
 	}
 
-	.quad-head {
-		// margin-bottom: 0.55rem;
-		// padding-bottom: 0.45rem;
-		// border-bottom: 1px solid var(--matrix-border);
-	}
-
 	/** One row: typology name | rule | share + context (editorial-style color split). */
 	.quad-headline {
 		display: flex;
@@ -262,19 +256,12 @@
 	.quad-title {
 		margin: 0;
 		min-width: 0;
-		font-family: var(--font-heading);
-		font-size: clamp(0.95rem, 1.85vw, 1.2rem);
-		font-weight: 650;
+		font-family: var(--chart-font-heading, var(--font-heading));
+		font-size: var(--chart-fs-lg, 16px);
+		font-weight: var(--chart-weight-semibold, 650);
 		line-height: 1.15;
-		color: var(--pa-primary-teal);
+		color: var(--color-primary);
 		letter-spacing: 0.01em;
-	}
-
-	.quad-head-rule {
-		flex: 0 0 1px;
-		align-self: stretch;
-		min-height: 2.4rem;
-		background: var(--color-gray-300);
 	}
 
 	.quad-metric {
@@ -288,21 +275,21 @@
 	}
 
 	.quad-pct {
-		font-family: var(--font-heading);
+		font-family: var(--chart-font-heading, var(--font-heading));
 		font-size: clamp(1.45rem, 3.2vw, 1.95rem);
-		font-weight: 700;
+		font-weight: var(--chart-weight-bold, 700);
 		line-height: 1;
-		color: var(--pa-primary-teal);
+		color: var(--color-primary);
 		flex-shrink: 0;
 	}
 
 	.quad-ctx {
 		display: flex;
 		flex-direction: column;
-		font-family: var(--font-body);
-		font-size: 0.78rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		line-height: 1.22;
-		color: var(--pa-primary-teal);
+		color: var(--color-primary);
 		text-transform: none;
 		padding-bottom: 0.08rem;
 		text-align: left;
@@ -319,10 +306,10 @@
 	.quad-traits {
 		margin: 0 0 0.65rem;
 		padding-left: 1.15rem;
-		font-family: var(--font-body);
-		font-size: 0.875rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-sm, 12.5px);
 		line-height: 1.45;
-		color: var(--color-text);
+		color: var(--chart-text, var(--color-text));
 	}
 
 	.quad-traits-item {
@@ -336,8 +323,8 @@
 
 	.quad-sub {
 		margin: 0;
-		font-family: var(--font-body);
-		font-size: 0.72rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		font-style: italic;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
@@ -369,10 +356,10 @@
 		grid-template-rows: auto auto auto;
 		row-gap: 0.2rem;
 		align-items: center;
-		font-family: var(--font-body);
-		font-size: 0.875rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-sm, 12.5px);
 		line-height: 1.35;
-		color: var(--color-text);
+		color: var(--chart-text, var(--color-text));
 		min-width: 0;
 	}
 
@@ -447,17 +434,6 @@
 
 	.spark-legend-text {
 		white-space: nowrap;
-	}
-
-	.quad-note {
-		grid-column: 1 / -1;
-		grid-row: 3;
-		margin: 0.15rem 0 0;
-		font-weight: 600;
-		font-style: italic;
-		font-size: 0.78rem;
-		line-height: 1.35;
-		color: var(--matrix-emphasis);
 	}
 
 	@media (max-width: 720px) {

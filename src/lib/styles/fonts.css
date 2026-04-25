@@ -11,6 +11,15 @@
 	font-display: swap;
 }
 
+/* Everviz/Highcharts embed uses this family name */
+@font-face {
+	font-family: 'founders-grotesk-regular';
+	src: url('/fonts/FoundersGrotesk-Regular.otf') format('opentype');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
 @font-face {
 	font-family: 'Founders Grotesk';
 	src: url('/fonts/founders-grotesk-semibold.woff2') format('woff2');
@@ -20,7 +29,24 @@
 }
 
 @font-face {
+	font-family: 'founders-grotesk-regular';
+	src: url('/fonts/founders-grotesk-semibold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
 	font-family: 'Feature';
+	src: url('/fonts/FeatureDisplay-Medium-Web.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Everviz/Highcharts embed uses this family name */
+@font-face {
+	font-family: 'FeatureDisplay-Medium-Web';
 	src: url('/fonts/FeatureDisplay-Medium-Web.woff2') format('woff2');
 	font-weight: 500;
 	font-style: normal;

@@ -340,7 +340,7 @@
 			<div
 				class="row"
 				animate:flip={{ duration: 250 }}
-				data-active={activeTrait === trait}
+				data-active={activeTrait === trait ? 'true' : 'false'}
 				style:grid-template-columns={`${showTraits ? 'var(--trait-col-effective)' : '0px'} ${columns
 					.map((_, i) =>
 						i === gapAfter ? 'var(--gap-col) minmax(0, 1fr)' : 'minmax(0, 1fr)'
@@ -348,9 +348,9 @@
 					.join(' ')}`}
 			>
 				{#if showTraits}
-					<div class="trait waffle-trait">{trait}</div>
+					<div class="trait waffle-trait chart-label-sans">{trait}</div>
 				{:else}
-					<div class="trait waffle-trait waffle-trait--spacer" aria-hidden="true"></div>
+					<div class="trait waffle-trait waffle-trait--spacer chart-label-sans" aria-hidden="true"></div>
 				{/if}
 				{#each columns as c, i (c)}
 					{#if i === gapAfter}
@@ -363,8 +363,8 @@
 						aria-label={`${trait} · ${c}: ${formatPercent(v)}`}
 						use:tippyTooltip={{
 							getContent: () => tooltipContent(trait, c),
+							accentColor: '#000000',
 							options: {
-								theme: 'light-border waffle',
 								followCursor: true,
 								touch: ['hold', 400]
 							}
@@ -395,8 +395,8 @@
 	.heatmap {
 		/* Default trait column width; can be overridden by inline `--trait-col-effective` */
 		--trait-col-effective: var(--trait-col, clamp(8rem, 18vw, 13rem));
-		--cell-h: 2rem;
-		--gap-col: 0.9rem;
+		--cell-h: var(--chart-cell-h, 2rem);
+		--gap-col: var(--chart-gap-col, 0.9rem);
 		/* Rotated column labels extend past the last column; reserve space so they aren’t clipped */
 		--heatmap-pad-inline-end: clamp(1.25rem, 2rem, 3.25rem);
 		width: 100%;
@@ -423,7 +423,7 @@
 		padding: 0;
 		margin: 0;
 		cursor: pointer;
-		color: var(--color-text-muted);
+		color: var(--chart-muted, var(--color-text-muted));
 		height: var(--col-header-h, 7.1rem);
 		width: 100%;
 		min-width: 0;
@@ -435,8 +435,8 @@
 	}
 
 	.col-header-text {
-		font-family: var(--font-body);
-		font-size: 0.78rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		line-height: 1.1;
 		white-space: nowrap;
 		position: absolute;
@@ -449,14 +449,14 @@
 	}
 
 	.col-header[aria-pressed='true'] .col-header-text {
-		color: var(--color-text);
+		color: var(--chart-text, var(--color-text));
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
 
 	.col-header[data-active='true'] .col-header-text {
-		color: var(--color-text);
-		font-weight: 650;
+		color: var(--chart-text, var(--color-text));
+		font-weight: var(--chart-weight-semibold, 650);
 	}
 
 	.col-header:focus-visible {
@@ -475,6 +475,11 @@
 		gap: 0.25rem;
 	}
 
+	/* Ensure active row label bolding always applies (avoid @import scoping surprises) */
+	.row[data-active='true'] .waffle-trait {
+		font-weight: var(--chart-weight-semibold, 650);
+	}
+
 	.gap {
 		width: var(--gap-col);
 	}
@@ -484,8 +489,8 @@
 		width: 100%;
 		min-width: 0;
 		height: var(--cell-h);
-		border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-		border-radius: 0.15rem;
+		border: 1px solid color-mix(in srgb, var(--chart-border, var(--color-border)) 80%, transparent);
+		border-radius: var(--chart-cell-radius, 0.15rem);
 		padding: 0;
 		display: inline-block;
 		cursor: default;
@@ -515,10 +520,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-family: var(--font-body);
-		font-size: 0.7rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		line-height: 1;
-		color: color-mix(in srgb, var(--color-text) 75%, transparent);
+		color: color-mix(in srgb, var(--chart-text, var(--color-text)) 75%, transparent);
 		mix-blend-mode: multiply;
 		user-select: none;
 		pointer-events: none;
@@ -529,38 +534,17 @@
 		outline-offset: 2px;
 	}
 
-	:global(.tippy-box[data-theme~='waffle']) {
-		background: var(--color-surface);
-		color: var(--color-text);
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
-		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-	}
-
-	:global(.tippy-box[data-theme~='waffle'] .tippy-content) {
-		padding: 0.6rem 0.65rem;
-	}
-
-	/* Ensure the arrow matches the light surface (avoid default dark arrow) */
-	:global(.tippy-box[data-theme~='waffle'] > .tippy-arrow::before) {
-		color: var(--color-surface);
-	}
-
-	:global(.tippy-box[data-theme~='waffle'] > .tippy-arrow) {
-		color: var(--color-surface);
-	}
-
 	:global(.waffle-tooltip) {
 		width: 18rem;
 		pointer-events: none;
 	}
 
 	:global(.waffle-tooltip-title) {
-		font-family: var(--font-body);
-		font-size: 0.85rem;
-		font-weight: 650;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-md, 14.5px);
+		font-weight: var(--chart-weight-semibold, 650);
 		line-height: 1.2;
-		color: var(--color-text);
+		color: var(--chart-text, var(--color-text));
 		margin-bottom: 0.45rem;
 	}
 
@@ -576,14 +560,14 @@
 		display: flex;
 		gap: 0.75rem;
 		justify-content: space-between;
-		font-family: var(--font-body);
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-sm, 12.5px);
+		color: var(--chart-muted, var(--color-text-muted));
 	}
 
 	:global(.waffle-tooltip-item[data-current='true']) {
-		font-weight: 650;
-		color: var(--color-text);
+		font-weight: var(--chart-weight-semibold, 650);
+		color: var(--chart-text, var(--color-text));
 	}
 
 	:global(.waffle-tooltip-item[data-current='true'] .waffle-tooltip-pill) {
@@ -601,18 +585,11 @@
 		min-width: 3.25rem;
 		padding: 0.15rem 0.4rem;
 		border-radius: 999px;
-		border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-		font-family: var(--font-body);
-		font-size: 0.78rem;
+		border: 1px solid color-mix(in srgb, var(--chart-border, var(--color-border)) 70%, transparent);
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-sm, 12.5px);
 		font-variant-numeric: tabular-nums;
 		line-height: 1;
-	}
-
-	@media (max-width: 640px) {
-		.heatmap {
-			--cell-h: 1.3rem;
-			--gap-col: 0.65rem;
-		}
 	}
 </style>
 

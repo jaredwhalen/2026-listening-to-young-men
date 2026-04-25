@@ -1,35 +1,38 @@
 /**
  * Shared copy + trait row labels for waffle heatmaps (WaffleHeatmap, TypologyDiffHeatmap)
  * and the waffle route intro paragraphs.
+ *
+ * Typography + neutrals are sourced from InlineVisual chart tokens.
  */
 
 .waffle-lead {
 	margin: 0 0 0.75rem;
-	font-family: var(--font-heading);
+	font-family: var(--chart-font-heading, var(--font-heading));
 	font-size: 1.2rem;
 	line-height: 1.4;
-	color: var(--color-text);
+	color: var(--chart-text, var(--color-text));
 	text-align: center;
 	font-style: italic;
 }
 
-:is(.heatmap, .typologies-heatmap) .waffle-trait {
-	font-family: var(--font-body);
-	font-size: 0.98rem;
+::is(.heatmap, .typologies-heatmap) .waffle-trait {
+	font-family: var(--chart-font-body, var(--font-body, system-ui, sans-serif));
+	font-size: var(--chart-fs-md, 14.5px);
 	line-height: 1.2;
 	white-space: nowrap;
-	color: var(--color-text);
+	color: var(--chart-text, var(--color-text));
 	width: fit-content;
 	padding-right: 0.5rem;
 	text-align: right;
 	justify-self: flex-end;
 }
 
-:is(.heatmap, .typologies-heatmap) .waffle-trait.waffle-trait--spacer {
+::is(.heatmap, .typologies-heatmap) .waffle-trait.waffle-trait--spacer {
 	padding-right: 0;
 }
 
-:is(.heatmap, .typologies-heatmap) .row[data-active='true'] .waffle-trait {
-	color: var(--color-text);
-	font-weight: 650;
+::is(.heatmap, .typologies-heatmap) .row[data-active='true'] .waffle-trait {
+	color: var(--chart-text, var(--color-text));
+	font-weight: var(--chart-weight-semibold, 650);
 }
+

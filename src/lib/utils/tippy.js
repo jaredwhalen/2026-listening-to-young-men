@@ -1,6 +1,7 @@
 import tippy, { followCursor } from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light-border.css';
+import '$lib/styles/tippy-everviz.css';
 
 /** Svelte action: attach an edge-aware tooltip. */
 export function tippyTooltip(node, params) {
@@ -8,9 +9,10 @@ export function tippyTooltip(node, params) {
 
 	function init(next) {
 		if (!next?.getContent) return;
-		const { getContent, options = {} } = next;
+		const { getContent, options = {}, accentColor = null } = next;
 		instance = tippy(node, {
-			theme: 'light-border',
+			// Use built-in bordered theme for proper notch, then customize via our CSS.
+			theme: 'light-border everviz',
 			animation: 'shift-away-subtle',
 			placement: 'top',
 			delay: [80, 0],
@@ -27,6 +29,11 @@ export function tippyTooltip(node, params) {
 			},
 			onShow(i) {
 				i.setContent(getContent());
+				if (accentColor) {
+					i.popper.style.setProperty('--tooltip-accent', accentColor);
+				} else {
+					i.popper.style.removeProperty('--tooltip-accent');
+				}
 				options.onShow?.(i);
 			},
 			...options
@@ -43,6 +50,7 @@ export function tippyTooltip(node, params) {
 				return;
 			}
 			if (!next?.getContent) return;
+			// Update props; content + accent are refreshed on show.
 			instance.setProps(next.options ?? {});
 		},
 		destroy() {

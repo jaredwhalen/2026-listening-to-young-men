@@ -323,10 +323,10 @@
 			<div
 				class="row"
 				animate:flip={{ duration: 250 }}
-				data-active={activeTrait === trait}
+				data-active={activeTrait === trait ? 'true' : 'false'}
 				style:grid-template-columns={`var(--trait-col-effective) ${gridDataCols}`}
 			>
-				<div class="trait waffle-trait">{trait}</div>
+				<div class="trait waffle-trait chart-label-sans">{trait}</div>
 				{#each compareColumns as c (c)}
 					{@const v = row?.values?.[c] ?? null}
 					{#if c === DIF}
@@ -337,8 +337,8 @@
 							aria-label={`${trait} · ${columnHeaderLabel(c)}: ${formatGapDisplay(v)}`}
 							use:tippyTooltip={{
 								getContent: () => tooltipContent(trait, c),
+								accentColor: '#000000',
 								options: {
-									theme: 'light-border waffle',
 									followCursor: true,
 									touch: ['hold', 400]
 								}
@@ -358,8 +358,8 @@
 							aria-label={`${trait} · ${columnHeaderLabel(c)}: ${formatPercent(v)}`}
 							use:tippyTooltip={{
 								getContent: () => tooltipContent(trait, c),
+								accentColor: '#000000',
 								options: {
-									theme: 'light-border waffle',
 									followCursor: true,
 									touch: ['hold', 400]
 								}
@@ -386,7 +386,7 @@
 
 	.typologies-heatmap {
 		--trait-col-effective: var(--trait-col, clamp(8rem, 18vw, 13rem));
-		--cell-h: 2rem;
+		--cell-h: var(--chart-cell-h, 2rem);
 		--heatmap-pad-inline-end: clamp(0.75rem, 2vw, 1.5rem);
 		width: 100%;
 		box-sizing: border-box;
@@ -412,7 +412,7 @@
 		padding: 0;
 		margin: 0;
 		cursor: pointer;
-		color: var(--color-text-muted);
+		color: var(--chart-muted, var(--color-text-muted));
 		width: 100%;
 		min-width: 0;
 		display: flex;
@@ -421,8 +421,8 @@
 	}
 
 	.col-header-text {
-		font-family: var(--font-body);
-		font-size: 0.72rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		line-height: 1.15;
 		text-align: center;
 		white-space: normal;
@@ -430,12 +430,12 @@
 	}
 
 	.col-header--gap .col-header-text {
-		font-size: 0.68rem;
+		font-size: var(--chart-fs-xs, 11px);
 		line-height: 1.1;
 	}
 
 	.col-header[aria-pressed='true'] .col-header-text {
-		color: var(--color-text);
+		color: var(--chart-text, var(--color-text));
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
@@ -456,13 +456,18 @@
 		gap: 0.25rem;
 	}
 
+	/* Ensure active row label bolding always applies (avoid @import scoping surprises) */
+	.row[data-active='true'] .waffle-trait {
+		font-weight: var(--chart-weight-semibold, 650);
+	}
+
 	.cell {
 		position: relative;
 		width: 100%;
 		min-width: 0;
 		height: var(--cell-h);
-		border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-		border-radius: 0.15rem;
+		border: 1px solid color-mix(in srgb, var(--chart-border, var(--color-border)) 80%, transparent);
+		border-radius: var(--chart-cell-radius, 0.15rem);
 		padding: 0;
 		display: inline-block;
 		cursor: default;
@@ -487,10 +492,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-family: var(--font-body);
-		font-size: 0.62rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-xs, 11px);
 		line-height: 1.1;
-		color: color-mix(in srgb, var(--color-text) 75%, transparent);
+		color: color-mix(in srgb, var(--chart-text, var(--color-text)) 75%, transparent);
 		mix-blend-mode: multiply;
 		user-select: none;
 		pointer-events: none;
@@ -516,12 +521,12 @@
 		align-items: center;
 		justify-content: center;
 		cursor: default;
-		border-radius: 0.15rem;
+		border-radius: var(--chart-cell-radius, 0.15rem);
 		transition: background-color 80ms ease-out;
 	}
 
 	.gap:hover {
-		background: color-mix(in srgb, var(--color-border) 22%, transparent);
+		background: color-mix(in srgb, var(--chart-border, var(--color-border)) 22%, transparent);
 	}
 
 	.gap[data-peer-sync='true'] {
@@ -535,34 +540,14 @@
 	}
 
 	.gap-value {
-		font-family: var(--font-body);
-		font-size: 0.72rem;
-		font-weight: 700;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-sm, 12.5px);
+		font-weight: var(--chart-weight-bold, 700);
 		font-variant-numeric: tabular-nums;
 		line-height: 1.1;
 		letter-spacing: -0.02em;
 		user-select: none;
 		pointer-events: none;
-	}
-
-	:global(.tippy-box[data-theme~='waffle']) {
-		background: var(--color-surface);
-		color: var(--color-text);
-		border: 1px solid var(--color-border);
-		border-radius: 0.5rem;
-		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-	}
-
-	:global(.tippy-box[data-theme~='waffle'] .tippy-content) {
-		padding: 0.6rem 0.65rem;
-	}
-
-	:global(.tippy-box[data-theme~='waffle'] > .tippy-arrow::before) {
-		color: var(--color-surface);
-	}
-
-	:global(.tippy-box[data-theme~='waffle'] > .tippy-arrow) {
-		color: var(--color-surface);
 	}
 
 	:global(.waffle-tooltip) {
@@ -575,11 +560,11 @@
 	}
 
 	:global(.waffle-tooltip-title) {
-		font-family: var(--font-body);
-		font-size: 0.85rem;
-		font-weight: 650;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-md, 14.5px);
+		font-weight: var(--chart-weight-semibold, 650);
 		line-height: 1.2;
-		color: var(--color-text);
+		color: var(--chart-text, var(--color-text));
 		margin-bottom: 0.25rem;
 	}
 
@@ -606,9 +591,9 @@
 		gap: 0.75rem;
 		justify-content: space-between;
 		align-items: center;
-		font-family: var(--font-body);
+		font-family: var(--chart-font-body, var(--font-body));
 		font-size: 0.85rem;
-		color: var(--color-text-muted);
+		color: var(--chart-muted, var(--color-text-muted));
 	}
 
 	:global(.waffle-tooltip--typology .waffle-tooltip-item) {
@@ -620,12 +605,12 @@
 	:global(.waffle-tooltip-item--gap) {
 		margin-top: 0.4rem;
 		padding-top: 0.35rem;
-		border-top: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+		border-top: 1px solid color-mix(in srgb, var(--chart-border, var(--color-border)) 65%, transparent);
 	}
 
 	:global(.waffle-tooltip-item[data-current='true']) {
-		font-weight: 650;
-		color: var(--color-text);
+		font-weight: var(--chart-weight-semibold, 650);
+		color: var(--chart-text, var(--color-text));
 	}
 
 	:global(.waffle-tooltip-item[data-current='true'] .waffle-tooltip-pill) {
@@ -649,9 +634,9 @@
 		min-width: 3.25rem;
 		padding: 0.15rem 0.4rem;
 		border-radius: 999px;
-		border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-		font-family: var(--font-body);
-		font-size: 0.78rem;
+		border: 1px solid color-mix(in srgb, var(--chart-border, var(--color-border)) 70%, transparent);
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: var(--chart-fs-sm, 12.5px);
 		font-variant-numeric: tabular-nums;
 		line-height: 1;
 	}
@@ -667,13 +652,4 @@
 		line-height: 1;
 	}
 
-	@media (max-width: 640px) {
-		.typologies-heatmap {
-			--cell-h: 1.35rem;
-		}
-
-		.gap-value {
-			font-size: 0.65rem;
-		}
-	}
 </style>
