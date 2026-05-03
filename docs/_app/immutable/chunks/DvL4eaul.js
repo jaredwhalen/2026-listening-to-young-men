@@ -1,1 +1,0 @@
-const e={waffle:{title:"TKTK",note:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet."},matrix:{title:"TKTK",note:"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet."}},t={charts:e};export{t as c};
