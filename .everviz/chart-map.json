@@ -1,0 +1,375 @@
+{
+  "charts": {
+    "figure_1_2": {
+      "chart_id": 622323,
+      "uuid": "hVBJTwS_u",
+      "title": "Self-driven/distrusting young men are most likely to have felt pressure to conform.",
+      "human_key": "Figure 1.2",
+      "updated_at": "2026-04-29T18:30:08.195Z"
+    },
+    "figure_1_3": {
+      "chart_id": 622324,
+      "uuid": "6WCN-LUj5",
+      "title": "Most young men believe women have unrealistic expectations.",
+      "human_key": "Figure 1.3",
+      "updated_at": "2026-04-29T18:30:08.704Z"
+    },
+    "figure_1_4": {
+      "chart_id": 622325,
+      "uuid": "FBkUzFX63",
+      "title": "Most young men believe it is becoming more difficult to succeed, but they also believe men are lazier today.",
+      "human_key": "Figure 1.4",
+      "updated_at": "2026-04-29T18:30:09.556Z"
+    },
+    "figure_1_5": {
+      "chart_id": 622326,
+      "uuid": "6T8h0uMqKW",
+      "title": "Being the sole provider is an important element of success for most young men.",
+      "human_key": "Figure 1.5",
+      "updated_at": "2026-04-29T18:30:10.030Z"
+    },
+    "figure_1_6": {
+      "chart_id": 622327,
+      "uuid": "5-mfsiBGi",
+      "title": "Young men are less likely than young women and older men to agree with equal opportunity and equal pay.",
+      "human_key": "Figure 1.6",
+      "updated_at": "2026-04-29T18:30:10.501Z"
+    },
+    "figure_1_7": {
+      "chart_id": 622328,
+      "uuid": "WSTohbjFEr",
+      "title": "Ninety percent of relational/distrusting young men agree with equal opportunity and equal pay. Fewer self-driven/trusting young men agree.",
+      "human_key": "Figure 1.7",
+      "updated_at": "2026-04-29T18:30:10.991Z"
+    },
+    "figure_1_8": {
+      "chart_id": 622329,
+      "uuid": "kdNKvQMG8",
+      "title": "More young men say social media influences their views on what it means to be a man than teachers or professors and sports or extracurricular coaches.",
+      "human_key": "Figure 1.8",
+      "updated_at": "2026-04-29T18:30:11.438Z"
+    },
+    "figure_1_9": {
+      "chart_id": 622330,
+      "uuid": "KWHhsLNZP-",
+      "title": "More relational/trusting than self-driven/distrusting young men turned to their fathers as influential in understanding what it means to be a man.",
+      "human_key": "Figure 1.9",
+      "updated_at": "2026-04-29T18:30:11.895Z"
+    },
+    "figure_2_1": {
+      "chart_id": 622331,
+      "uuid": "XuPVZ7d-9",
+      "title": "Many young men believe college is a questionable investment.",
+      "human_key": "Figure 2.1",
+      "updated_at": "2026-04-29T18:30:12.371Z"
+    },
+    "figure2_2": {
+      "chart_id": 622332,
+      "uuid": "0oGd3cNPyc",
+      "title": "Many young men believe colleges do not align with workplace needs.",
+      "human_key": "Figure2.2",
+      "updated_at": "2026-04-29T18:30:12.881Z"
+    },
+    "figure_2_3": {
+      "chart_id": 622333,
+      "uuid": "b04nkAtTB",
+      "title": "Young men believe colleges are designed to benefit women.",
+      "human_key": "Figure 2.3",
+      "updated_at": "2026-04-29T18:30:13.369Z"
+    },
+    "figure_2_4": {
+      "chart_id": 622334,
+      "uuid": "8eckNxUgaF",
+      "title": "Most self-driven/distrusting young men believe men should have physically demanding jobs.",
+      "human_key": "Figure 2.4",
+      "updated_at": "2026-04-29T18:30:13.868Z"
+    },
+    "figure_2_5": {
+      "chart_id": 622335,
+      "uuid": "MrOD7M-EF",
+      "title": "Most self-driven/distrusting young men, even those who are Democrats, agree that people without liberal political views are not welcome at colleges.",
+      "human_key": "Figure 2.5",
+      "updated_at": "2026-04-29T18:30:14.399Z"
+    },
+    "figure_2_6": {
+      "chart_id": 622336,
+      "uuid": "84USc79HqD",
+      "title": "Young men view trade schools and bachelor’s degrees as holding similar value.",
+      "human_key": "Figure 2.6",
+      "updated_at": "2026-04-29T18:30:14.983Z"
+    },
+    "figure_2_7": {
+      "chart_id": 622337,
+      "uuid": "tZ1xcCtFM",
+      "title": "Relational/distrusting young men are most likely to see the value of obtaining a bachelor’s degree or higher in today’s job market.",
+      "human_key": "Figure 2.7",
+      "updated_at": "2026-04-29T18:30:15.477Z"
+    },
+    "figure_2_8": {
+      "chart_id": 622338,
+      "uuid": "ObU5V1MgjP",
+      "title": "Fewer young men than young women felt pressure from society to pursue a degree.",
+      "human_key": "Figure 2.8",
+      "updated_at": "2026-04-29T18:30:15.926Z"
+    },
+    "figure_2_9": {
+      "chart_id": 622339,
+      "uuid": "yyLpq-mf-",
+      "title": "More young men than young women did not seriously consider pursuing a degree after high school.",
+      "human_key": "Figure 2.9",
+      "updated_at": "2026-04-29T18:30:16.400Z"
+    },
+    "figure_2_10": {
+      "chart_id": 622340,
+      "uuid": "mH7HRtRfXb",
+      "title": "Self-driven/distrusting young men without degrees are most likely to have felt pressure to enroll in college even though they weren’t ready.",
+      "human_key": "Figure 2.10",
+      "updated_at": "2026-04-29T18:30:16.938Z"
+    },
+    "figure_2_11": {
+      "chart_id": 622341,
+      "uuid": "EaPN2TFXK",
+      "title": "Affordability, uncertainty about what to study, and a preference for full-time work are the main reasons young men say they do not pursue a degree after high school.",
+      "human_key": "Figure 2.11",
+      "updated_at": "2026-04-29T18:30:17.406Z"
+    },
+    "figure_2_12": {
+      "chart_id": 622342,
+      "uuid": "MHF0ZlgmeL",
+      "title": "More young Black than Latino or white young men did not pursue a degree after high school because of a major life event. Fewer young Black men than their Latino or white peers cite costs.",
+      "human_key": "Figure 2.12",
+      "updated_at": "2026-04-29T18:30:17.931Z"
+    },
+    "figure_2_13": {
+      "chart_id": 622343,
+      "uuid": "YAabsm36F",
+      "title": "Black and Latino young men are more likely than their white peers to report financial impacts from not obtaining a degree.",
+      "human_key": "Figure 2.13",
+      "updated_at": "2026-04-29T18:30:18.400Z"
+    },
+    "figure_2_14": {
+      "chart_id": 622344,
+      "uuid": "vSWGGzuTow",
+      "title": "Self-driven/distrusting young men without degrees are most likely to experience financial and social impacts from the lack of a credential.",
+      "human_key": "Figure 2.14",
+      "updated_at": "2026-04-29T18:30:18.901Z"
+    },
+    "figure_2_15": {
+      "chart_id": 622345,
+      "uuid": "Si27QDI4b",
+      "title": "Self-driven/distrusting young men are most likely to regret pursuing their degree",
+      "human_key": "Figure 2.15",
+      "updated_at": "2026-04-29T18:30:19.359Z"
+    },
+    "figure_2_16": {
+      "chart_id": 622346,
+      "uuid": "O8_gTbNoPN",
+      "title": "Young Latino men are most likely to report they would like to earn a degree but face various barriers.",
+      "human_key": "Figure 2.16",
+      "updated_at": "2026-04-29T18:30:19.834Z"
+    },
+    "figure_2_17": {
+      "chart_id": 622347,
+      "uuid": "GhKx5jHJG",
+      "title": "Many young men without degrees would like to earn one, but they see barriers.",
+      "human_key": "Figure 2.17",
+      "updated_at": "2026-04-29T18:30:20.315Z"
+    },
+    "figure_2_18": {
+      "chart_id": 622348,
+      "uuid": "AW1p904D4",
+      "title": "More young men than women pursued a college degree to build professional networks.",
+      "human_key": "Figure 2.18",
+      "updated_at": "2026-04-29T18:30:20.779Z"
+    },
+    "figure_2_19": {
+      "chart_id": 622349,
+      "uuid": "wZiqhYo7Hu",
+      "title": "Young men who have a degree are more likely than those without a degree to believe hard work will lead to success.",
+      "human_key": "Figure 2.19",
+      "updated_at": "2026-04-29T18:30:21.219Z"
+    },
+    "figure_2_20": {
+      "chart_id": 622350,
+      "uuid": "1el__yAo5",
+      "title": "Young men with degrees report their college education was useful in helping them grow personally, professionally, and socially.",
+      "human_key": "Figure 2.20",
+      "updated_at": "2026-04-29T18:30:21.678Z"
+    },
+    "figure_2_20b": {
+      "chart_id": 622351,
+      "uuid": "yp25Hk2Ua5",
+      "title": "Young men with degrees report their college education was useful in helping them grow personally, professionally, and socially.",
+      "human_key": "Figure 2.20b",
+      "updated_at": "2026-04-29T18:30:22.170Z"
+    },
+    "figure_2_21": {
+      "chart_id": 622352,
+      "uuid": "Zx5lvrdQz",
+      "title": "Young men believe reducing the cost of pursuing a degree and expanding work experience and job placement partnerships would make college a better investment.",
+      "human_key": "Figure 2.21",
+      "updated_at": "2026-04-29T18:30:22.647Z"
+    },
+    "figure_2_22": {
+      "chart_id": 622353,
+      "uuid": "TrE83qGEUp",
+      "title": "Relational/distrusting young men are most likely to say reducing tuition would help a lot to make college a safer investment.",
+      "human_key": "Figure 2.22",
+      "updated_at": "2026-04-29T18:30:23.120Z"
+    },
+    "figure_2_23": {
+      "chart_id": 622354,
+      "uuid": "duPhnFdS5",
+      "title": "Young men trust community-based organizations more than the government to help make college a better investment.",
+      "human_key": "Figure 2.23",
+      "updated_at": "2026-04-29T18:30:23.710Z"
+    },
+    "figure_2_24": {
+      "chart_id": 622355,
+      "uuid": "IpxiMNvnFs",
+      "title": "Self-driven/distrusting young men believe employers and industry coalitions are a plausible group to make college a better investment.",
+      "human_key": "Figure 2.24",
+      "updated_at": "2026-04-29T18:30:24.179Z"
+    },
+    "figure_3_1": {
+      "chart_id": 622356,
+      "uuid": "oTXXZFfV3",
+      "title": "Young men and young women report feeling disconnected and irrelevant at similar rates.",
+      "human_key": "Figure 3.1",
+      "updated_at": "2026-04-29T18:30:24.655Z"
+    },
+    "figure_3_2": {
+      "chart_id": 622357,
+      "uuid": "Jh3xULaGuq",
+      "title": "Relational/distrusting and self-driven/distrusting young men are especially likely to have felt lonely or irrelevant.",
+      "human_key": "Figure 3.2",
+      "updated_at": "2026-04-29T18:30:25.113Z"
+    },
+    "figure_3_3": {
+      "chart_id": 622358,
+      "uuid": "l7Jb4ZtiM",
+      "title": "Disconnection and irrelevance is lower among relational/distrusting young men who have a degree than those without. This is not true for the self-driven/distrusting peers.",
+      "human_key": "Figure 3.3",
+      "updated_at": "2026-04-29T18:30:25.598Z"
+    },
+    "figure_3_4": {
+      "chart_id": 622359,
+      "uuid": "ahB8jZO3Xr",
+      "title": "Young women are more likely than young men to say they had someone for emotional support. Young men are more likely to say they felt like part of the country.",
+      "human_key": "Figure 3.4",
+      "updated_at": "2026-04-29T18:30:26.081Z"
+    },
+    "figure_3_5": {
+      "chart_id": 622360,
+      "uuid": "ILrVfAyaK",
+      "title": "Most relational and self-driven/distrusting young men want more people to connect with and most wish they had deeper connections.",
+      "human_key": "Figure 3.5",
+      "updated_at": "2026-04-29T18:30:26.545Z"
+    },
+    "figure_3_5b": {
+      "chart_id": 622361,
+      "uuid": "gBXJW-QE9y",
+      "title": "Most relational and self-driven/distrusting young men want more people to connect with and most wish they had deeper connections.",
+      "human_key": "Figure 3.5b",
+      "updated_at": "2026-04-29T18:30:27.018Z"
+    },
+    "figure_3_6": {
+      "chart_id": 622362,
+      "uuid": "pj3DGh-Iw",
+      "title": "Relational/trusting and self-driven/trusting young men with degrees are more likely than their counterparts without a degree to say they had someone to turn to for emotional support.",
+      "human_key": "Figure 3.6",
+      "updated_at": "2026-04-29T18:30:27.468Z"
+    },
+    "figure_3_7": {
+      "chart_id": 622363,
+      "uuid": "G3IJmGBrWd",
+      "title": "Relational/trusting young men are more likely than their self-driven/distrusting peers to say most of their interactions outside of work and school are with close friends.",
+      "human_key": "Figure 3.7",
+      "updated_at": "2026-04-29T18:30:27.910Z"
+    },
+    "figure_3_8": {
+      "chart_id": 622364,
+      "uuid": "_8adrGQsc",
+      "title": "Young men are more likely than young women to use gaming platforms, collaboration platforms, and online forums.",
+      "human_key": "Figure 3.8",
+      "updated_at": "2026-04-29T18:30:28.365Z"
+    },
+    "figure_3_9": {
+      "chart_id": 622365,
+      "uuid": "tlvHC8PaoV",
+      "title": "Self-driven/distrusting young men are most likely to use gaming platforms, collaboration platforms, and online forums.",
+      "human_key": "Figure 3.9",
+      "updated_at": "2026-04-29T18:30:28.817Z"
+    },
+    "figure_3_10": {
+      "chart_id": 622366,
+      "uuid": "L3p0a-1uF",
+      "title": "Young men most often follow influencers or podcasts related to gaming and sports, while young women prefer content focusing on mental health, pop culture, and lifestyle.",
+      "human_key": "Figure 3.10",
+      "updated_at": "2026-04-29T18:30:29.314Z"
+    },
+    "figure_3_11": {
+      "chart_id": 622367,
+      "uuid": "q8OPX_gjxy",
+      "title": "Self-driven/distrusting young men are most likely to follow content creators and podcasts that discuss masculinity.",
+      "human_key": "Figure 3.11",
+      "updated_at": "2026-04-29T18:30:29.786Z"
+    },
+    "figure_4_1": {
+      "chart_id": 622368,
+      "uuid": "7VsCQ5_QO",
+      "title": "Most Americans are skeptical that the government is working for the people.",
+      "human_key": "Figure 4.1",
+      "updated_at": "2026-04-29T18:30:30.280Z"
+    },
+    "figure_4_2": {
+      "chart_id": 622369,
+      "uuid": "4Md_c-5jQm",
+      "title": "Majorities of young men across political identity are skeptical that the government is working for the people.",
+      "human_key": "Figure 4.2",
+      "updated_at": "2026-04-29T18:30:30.743Z"
+    },
+    "figure_4_3": {
+      "chart_id": 622370,
+      "uuid": "IcZCaH-9ts",
+      "title": "Self-driven/distrusting young men are most likely to say the government is functioning as intended.",
+      "human_key": "Figure 4.3",
+      "updated_at": "2026-04-29T18:30:31.267Z"
+    },
+    "figure_4_4": {
+      "chart_id": 622371,
+      "uuid": "oddPNiZ82",
+      "title": "Self-driven/distrusting young men are most likely to believe average Americans have power influencing policy.",
+      "human_key": "Figure 4.4",
+      "updated_at": "2026-04-29T18:30:31.805Z"
+    },
+    "figure_4_5": {
+      "chart_id": 622372,
+      "uuid": "7JF9Mmbl9",
+      "title": "Only a third of relational/distrusting young men believe the design and structure of the nation’s government is fine.",
+      "human_key": "Figure 4.5",
+      "updated_at": "2026-04-29T18:30:32.270Z"
+    },
+    "figure_4_6": {
+      "chart_id": 622373,
+      "uuid": "veqWGv2Bli",
+      "title": "Self-driven/distrusting young men are most likely to believe ordinary people have influence at the national level.",
+      "human_key": "Figure 4.6",
+      "updated_at": "2026-04-29T18:30:32.768Z"
+    },
+    "figure_4_7": {
+      "chart_id": 622374,
+      "uuid": "Uap_FG8PqI",
+      "title": "Self-driven/distrusting young men are more likely to report engagement in their communities and in democratic practices.",
+      "human_key": "Figure 4.7",
+      "updated_at": "2026-04-29T18:30:33.239Z"
+    },
+    "figure_4_8": {
+      "chart_id": 622375,
+      "uuid": "TkQ2OA8Pg",
+      "title": "Fewer self-driven/trusting young men than their peers believe it is important to vote.",
+      "human_key": "Figure 4.8",
+      "updated_at": "2026-04-29T18:30:33.699Z"
+    }
+  }
+}

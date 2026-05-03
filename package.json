@@ -11,6 +11,8 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"gdoc": "node tasks/fetch-google.js",
+		"everviz:sync": "node tasks/everviz-sync.js",
+		"everviz:delete-mapped": "node tasks/everviz-delete-mapped.js",
 		"setup": "node tasks/setup.js"
 	},
 	"devDependencies": {
@@ -27,6 +29,8 @@
 		"chaikin-smooth": "^1.0.4",
 		"change-case": "^5.4.4",
 		"d3": "^7.9.0",
+		"dotenv": "^17.2.2",
+		"googleapis": "^160.0.0",
 		"lodash.debounce": "^4.0.8",
 		"lucide-svelte": "^1.0.1",
 		"mapbox-gl": "^3.15.0",

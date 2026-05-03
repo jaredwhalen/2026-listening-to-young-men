@@ -61,6 +61,47 @@ Typical flow: run `setup` → `npm run build` → copy **`dist/`** into **`docs/
 - `npm run build` — Production build into `dist/`
 - `npm run build:embed` — `build` then `node tasks/generate-embed.js`
 - `npm run preview` — Local preview of the production build
+- `npm run everviz:sync` — Sync Everviz charts from a Google Sheet manifest into Everviz (creates/updates + emits `.everviz/report.md`)
+- `npm run everviz:delete-mapped` — Delete every chart listed in `.everviz/chart-map.json` (dry-run unless you pass `--yes`)
+
+## Everviz chart automation
+
+This repo includes a small sync script that reads a **manifest tab** in a Google Sheet and then, for each row, reads a **data tab** (also CSV-exported) and creates/updates an Everviz chart.
+
+### Required environment variables
+
+- `GOOGLE_SHEET_ID`: Google Sheets spreadsheet id (the long id in the URL)
+- `GOOGLE_MANIFEST_GID`: The `gid` of the manifest tab (optional if you use `GOOGLE_MANIFEST_SHEET_NAME`)
+- `GOOGLE_MANIFEST_SHEET_NAME`: The manifest tab name (optional if you use `GOOGLE_MANIFEST_GID`)
+- `EVERVIZ_TEAM_ID`: Your Everviz team id
+- `EVERVIZ_API_KEY`: An Everviz API key (sent as `X-API-Key`)
+
+Optional:
+
+- `EVERVIZ_THEME_ID`: Default theme id if a row doesn’t specify one
+- `EVERVIZ_DRY_RUN=1`: Parse everything + write report, but don’t create/update charts
+- `GOOGLE_USE_AUTH=1`: Use Google Sheets API auth (recommended for non-public sheets)
+- `GOOGLE_APPLICATION_CREDENTIALS`: Path to a service account JSON file (standard Google env var)
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: Inline service account JSON (stringified). Useful in CI.
+
+### Manifest schema (tab CSV columns)
+
+Column names are case-insensitive; spaces are normalized to underscores by the script.
+
+- **`key`** (required): Human identifier for the chart (e.g. `Figure 1.2`). The script will slugify it internally (e.g. `figure_1_2`) for idempotency.
+- **`enabled`** (optional, default true): `true/false` to include/exclude this row
+- **`title`** (optional, default `key`): Chart title
+- **`description`** (optional): Shown as the chart subtitle
+- **`source`** (optional): Used as Highcharts `credits.text`
+- **`chart_type`** (optional, default `column`): Highcharts chart type (`bar`, `column`, `line`, `pie`, etc.)
+- **`theme_id`** (optional): Everviz theme id for this chart (overrides `EVERVIZ_THEME_ID`)
+- **`data_sheet_name`** (optional, default `key`): The sheet tab name that contains the CSV data for this chart
+- **`data_gid`** (optional): The `gid` of the data tab (legacy fallback if you prefer gids)
+- **`series_mapping_json`** (optional): JSON string for Highcharts data module `seriesMapping`
+- **`options_json`** (optional): JSON string that is deep-merged into the Highcharts `options` object
+
+The data tab should be laid out as a normal CSV table; the script sends the full tab as `options.data.csv`.
+
 
 ## Project layout (source)
 
