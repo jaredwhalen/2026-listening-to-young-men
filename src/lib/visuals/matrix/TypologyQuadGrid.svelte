@@ -1,6 +1,6 @@
 <script>
 	// Avoid `lucide-svelte` package root (broken `./icons/index` under Node SSR).
-	import Landmark from "lucide-svelte/icons/landmark";
+	import Info from "lucide-svelte/icons/info";
 	import Scale from "lucide-svelte/icons/scale";
 	import Users from "lucide-svelte/icons/users";
 	import GraduationCap from "lucide-svelte/icons/graduation-cap";
@@ -8,9 +8,13 @@
 	import StackedBarSpark from "./StackedBarSpark.svelte";
 	import { quadrantKey } from "./parseTypologyCsv.js";
 	import { shortCategory } from "./formatTypologyLine.js";
-	import { colorsForMatrixAttribute } from "./matrixDemoColors.js";
+	import {
+		colorsForMatrixAttribute,
+		colorForTypologyQuadrant,
+	} from "./matrixDemoColors.js";
+	import { tippyTooltip } from "$lib/utils/tippy.js";
 
-	const ICONS = { Landmark, Scale, Users, GraduationCap, Calendar };
+	const ICONS = { Scale, Users, GraduationCap, Calendar };
 
 	let { quadrants, columnPcts, rowPcts, copy } = $props();
 
@@ -28,9 +32,45 @@
 		return copy.quadrantTitles[k] ?? `${q.agency} / ${q.trustLevel}`;
 	}
 
-	function bulletsForQuadrant(q) {
+	function shortDescriptionForQuadrant(q) {
 		const k = quadrantKey(q.trustLevel, q.agency);
-		return copy.quadrantBullets?.[k] ?? [];
+		return copy.quadrantShortDescription?.[k] ?? "";
+	}
+
+	function longDescriptionForQuadrant(q) {
+		const k = quadrantKey(q.trustLevel, q.agency);
+		return copy.quadrantLongDescription?.[k] ?? "";
+	}
+
+	function quadrantAccent(q) {
+		return colorForTypologyQuadrant(quadrantKey(q.trustLevel, q.agency));
+	}
+
+	function summaryTooltipParams(q) {
+		const long = longDescriptionForQuadrant(q);
+		if (!long) return null;
+		const groupTitle = titleForQuadrant(q);
+		return {
+			getContent: () => {
+				const wrap = document.createElement("div");
+				wrap.className = "matrix-typology-tooltip";
+				const head = document.createElement("div");
+				head.className = "everviz-tooltip-title matrix-typology-tooltip__title";
+				head.textContent = groupTitle;
+				const body = document.createElement("p");
+				body.className = "matrix-typology-tooltip__body";
+				body.textContent = long;
+				wrap.append(head, body);
+				return wrap;
+			},
+			accentColor: quadrantAccent(q),
+			options: {
+				trigger: "mouseenter focus",
+				maxWidth: 440,
+				interactive: true,
+				appendTo: () => document.body,
+			},
+		};
 	}
 </script>
 
@@ -61,27 +101,40 @@
 
 	<div class="quad-grid">
 		{#each quadrants as q (quadrantKey(q.trustLevel, q.agency))}
-			{@const traitLines = bulletsForQuadrant(q)}
+			{@const accent = quadrantAccent(q)}
+			{@const summaryShort = shortDescriptionForQuadrant(q)}
+			{@const tipParams = summaryTooltipParams(q)}
 			<section class="quad-card">
 				<header class="quad-head">
 					<div class="quad-headline">
-						<h3 class="quad-title">{titleForQuadrant(q)}</h3>
+						<h3 class="quad-title" style:color={accent}>
+							{titleForQuadrant(q)}
+						</h3>
 						<!-- <span class="quad-head-rule" aria-hidden="true"></span> -->
 						<div class="quad-metric">
-							<span class="quad-pct">{q.quadrantPct}%</span>
-							<span class="quad-ctx">
+							<span class="quad-pct" style:color={accent}>{q.quadrantPct}%</span>
+							<span class="quad-ctx" style:color={accent}>
 								{#each copy.metricContext as line, i (i)}
 									<span class="quad-ctx-line">{line}</span>
 								{/each}
 							</span>
 						</div>
 					</div>
-					{#if traitLines.length}
-						<ul class="quad-traits">
-							{#each traitLines as line, i (i)}
-								<li class="quad-traits-item">{line}</li>
-							{/each}
-						</ul>
+					{#if summaryShort}
+						<div class="quad-summary-row">
+							<p class="quad-summary">{summaryShort}</p>
+							{#if tipParams}
+								<button
+									type="button"
+									class="quad-info-tip"
+									style:color={accent}
+									aria-label={`Full description: ${titleForQuadrant(q)}`}
+									use:tippyTooltip={tipParams}
+								>
+									<Info size={17} strokeWidth={1.75} aria-hidden="true" />
+								</button>
+							{/if}
+						</div>
 					{/if}
 				</header>
 
@@ -303,22 +356,66 @@
 		font-style: italic;
 	}
 
-	.quad-traits {
+	.quad-summary-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.35rem;
 		margin: 0 0 0.65rem;
-		padding-left: 1.15rem;
+		min-width: 0;
+	}
+
+	.quad-summary {
+		flex: 1;
+		min-width: 0;
+		margin: 0;
+		padding: 0;
 		font-family: var(--chart-font-body, var(--font-body));
 		font-size: var(--chart-fs-sm, 12.5px);
 		line-height: 1.45;
 		color: var(--chart-text, var(--color-text));
 	}
 
-	.quad-traits-item {
-		margin-bottom: 0.4rem;
-		padding-left: 0.15rem;
+	.quad-info-tip {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0.12rem 0 0;
+		padding: 0.12rem;
+		border: none;
+		border-radius: 3px;
+		background: transparent;
+		cursor: help;
+		line-height: 0;
+		opacity: 0.88;
+		transition: opacity 0.12s ease, background 0.12s ease;
 	}
 
-	.quad-traits-item:last-child {
-		margin-bottom: 0;
+	.quad-info-tip:hover {
+		opacity: 1;
+		background: color-mix(in srgb, currentColor 12%, transparent);
+	}
+
+	.quad-info-tip:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 1px;
+		opacity: 1;
+	}
+
+	/* Tooltip is portaled to body; theme class lives on .tippy-box */
+	:global(.tippy-box[data-theme~="everviz"] .matrix-typology-tooltip__title) {
+		font-size: 13px;
+		font-weight: 800;
+		line-height: 1.25;
+		margin: 0 0 0.35rem;
+		letter-spacing: 0.01em;
+	}
+
+	:global(.tippy-box[data-theme~="everviz"] .matrix-typology-tooltip__body) {
+		margin: 0;
+		font-weight: 400;
+		font-size: 12px;
+		line-height: 1.4;
 	}
 
 	.quad-sub {

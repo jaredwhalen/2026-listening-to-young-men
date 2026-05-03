@@ -39,6 +39,9 @@ export function parseTypologyCsv(rows) {
 		const byKey = new Map();
 
 		for (const r of rows) {
+			// Client request: omit party identification from the matrix graphic.
+			if (r.attribute === 'Party Identification') continue;
+
 			const key = quadrantKey(r.trust_level, r.agency);
 			let q = byKey.get(key);
 			if (!q) {

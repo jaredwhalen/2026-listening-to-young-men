@@ -1,4 +1,23 @@
 /**
+ * Series colors for the four typology quadrants (align with Everviz / questions.csv column order).
+ * Keys match `quadrantKey(trustLevel, agency)` from parseTypologyCsv.js.
+ */
+export const MATRIX_TYPOLOGY_QUADRANT_COLORS = {
+	'Trusting|Relational': 'var(--pa-blue)',
+	'Distrusting|Relational': 'var(--pa-orange)',
+	'Trusting|Self-driven': 'var(--pa-primary-teal)',
+	'Distrusting|Self-driven': 'var(--pa-purple)'
+};
+
+/**
+ * @param {string} key quadrantKey(trust, agency)
+ * @returns {string} CSS color value
+ */
+export function colorForTypologyQuadrant(key) {
+	return MATRIX_TYPOLOGY_QUADRANT_COLORS[key] ?? 'var(--color-primary)';
+}
+
+/**
  * Matrix typology — colors per CSV `attribute` and `category`.
  * Add or edit entries here; any category not listed uses `DEFAULT_MATRIX_STACK_PALETTE`
  * in order (only for unmapped segments).
