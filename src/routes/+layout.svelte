@@ -15,13 +15,60 @@
 		--layout-padding-inline: ${project.layout.horizontalPadding};
 	`;
 
-	onMount(async () => {
-		// Handle responsive iframes for embeds (pym.js)
-		// Only initialize when framed to avoid unnecessary polling in standalone use.
-		if (window.self === window.top) return;
+	onMount(() => {
+		// pym.js Child#sendHeight uses document.body.offsetHeight. After the parent sets a
+		// tall iframe, the body often stretches to that viewport height, so reported height
+		// never shrinks. We measure the real content box (.layout-root) and ping the parent.
+		if (typeof window === 'undefined' || window.self === window.top) return;
+
 		isEmbed = true;
-		const { default: pym } = await import('pym.js');
-		new pym.Child({ polling: 500 });
+
+		let disposed = false;
+		let pymChild = null;
+		let pollId = 0;
+		/** @type {ResizeObserver | null} */
+		let ro = null;
+
+		function measureHeightPx() {
+			const root = document.querySelector('.layout-root');
+			if (!root) {
+				return Math.ceil(document.documentElement.scrollHeight);
+			}
+			const br = root.getBoundingClientRect();
+			const bodyStyle = window.getComputedStyle(document.body);
+			const mb = parseFloat(bodyStyle.marginBottom) || 0;
+			return Math.ceil(br.bottom + window.scrollY + mb);
+		}
+
+		function pingParent() {
+			if (!pymChild || disposed) return;
+			const h = measureHeightPx();
+			pymChild.sendMessage('height', String(h));
+		}
+
+		import('pym.js').then(({ default: pym }) => {
+			if (disposed) return;
+			// polling: 0 — pym's interval calls the built-in sendHeight; we replace it below.
+			pymChild = new pym.Child({ polling: 0 });
+			if (pymChild.timerId) {
+				clearInterval(pymChild.timerId);
+				pymChild.timerId = null;
+			}
+			pymChild.sendHeight = pingParent;
+			pingParent();
+			pollId = window.setInterval(pingParent, 400);
+			ro = new ResizeObserver(pingParent);
+			ro.observe(document.documentElement);
+			const root = document.querySelector('.layout-root');
+			if (root) ro.observe(root);
+		});
+
+		return () => {
+			disposed = true;
+			if (pollId) clearInterval(pollId);
+			ro?.disconnect();
+			pymChild?.remove?.();
+		};
 	});
 </script>
 
@@ -75,5 +122,16 @@
 	:global(html, body) {
 		margin: 0;
 		color: var(--color-text);
+	}
+
+	/*
+	 * In a tall iframe, block layout can stretch html/body to the iframe viewport, which
+	 * makes pym's body.offsetHeight stick at the old (large) value. Collapse that chain when
+	 * the app root opts into embed mode.
+	 */
+	:global(html:has(.layout-root[data-embed='true'])),
+	:global(html:has(.layout-root[data-embed='true']) body) {
+		height: auto;
+		min-height: 0;
 	}
 </style>
