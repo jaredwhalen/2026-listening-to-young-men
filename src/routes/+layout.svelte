@@ -4,6 +4,7 @@
 	import '$lib/styles/theme.css';
 	import project from '$lib/config/project.js';
 	import CdnPrefetch from '$lib/components/CdnPrefetch.svelte';
+	import { onMount } from 'svelte';
 
 	let { children } = $props();
 
@@ -12,6 +13,14 @@
 		--layout-max-width: ${isColumn ? `${project.layout.maxWidthPx}px` : 'none'};
 		--layout-padding-inline: ${project.layout.horizontalPadding};
 	`;
+
+	onMount(async () => {
+		// Handle responsive iframes for embeds (pym.js)
+		// Only initialize when framed to avoid unnecessary polling in standalone use.
+		if (window.self === window.top) return;
+		const { default: pym } = await import('pym.js');
+		new pym.Child({ polling: 500 });
+	});
 </script>
 
 <CdnPrefetch />
