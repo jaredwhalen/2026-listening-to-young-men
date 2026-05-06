@@ -1,3 +1,15 @@
 section,qId,question,Relational / Trusting,Relational / Distrusting,Self-driven / Trusting,Self-driven / Distrusting
 The Expectations Gap,1,I've felt pressured to act more masculine,0.46,0.6,0.52,0.72
 The Expectations Gap,2,I’ve felt pressured to act less masculine,0.29,0.38,0.37,0.55
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,question,I've felt pressured to act more masculine,I’ve felt pressured to act less masculine,,,
+,Relational / Trusting,0.46,0.29,,,
+,Relational / Distrusting,0.6,0.38,,,
+,Self-driven / Trusting,0.52,0.37,,,
+,Self-driven / Distrusting,0.72,0.55,,,

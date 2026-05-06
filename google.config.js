@@ -17,5 +17,10 @@ export default [
 		"id": "1N1nvvu7YW323MGdT8oEkWaApujDWOhZzqjb5MTGI_30",
 		"gid": "1682152827",
 		"filepath": "src/lib/data/questions.csv"
+	},
+	{
+		"id": "1N1nvvu7YW323MGdT8oEkWaApujDWOhZzqjb5MTGI_30",
+		"gid": "807317230",
+		"filepath": "src/lib/data/questions-full.csv"
 	}
 ]

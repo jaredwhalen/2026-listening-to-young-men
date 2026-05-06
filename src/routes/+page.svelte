@@ -1,6 +1,6 @@
 <script>
 	const routes = [
-		{ href: '/matrix', label: 'Matrix (inline)' },
+		{ href: '/typology', label: 'Typology (inline)' },
 		{ href: '/waffle', label: 'Waffle' },
 		{ href: '/dotplot', label: 'Dot plot' },
 		{ href: '/dotplot-interactive', label: 'Dot plot (interactive)' }

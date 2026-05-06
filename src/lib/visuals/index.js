@@ -1,1 +1,1 @@
-export { default as MatrixScrolly } from './matrix/MatrixScrolly.svelte';
+export { default as TypologyQuadGrid } from './typology/TypologyQuadGrid.svelte';

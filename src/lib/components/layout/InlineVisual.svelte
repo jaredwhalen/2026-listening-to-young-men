@@ -1,5 +1,18 @@
 <script>
-	let { children, title, dek, note, class: className = '' } = $props();
+	/**
+	 * Optional plain-text header fields (e.g. from copy.json). Use when you cannot pass snippets.
+	 * If both `title` and `titleText` are set, the snippet wins.
+	 */
+	let {
+		children,
+		title,
+		dek,
+		note,
+		titleText = '',
+		dekText = '',
+		noteText = '',
+		class: className = '',
+	} = $props();
 </script>
 
 <article class="inline-visual {className}">
@@ -7,10 +20,16 @@
 		<header class="inline-visual-header">
 			<h1 class="inline-visual-title">{@render title()}</h1>
 		</header>
+	{:else if titleText}
+		<header class="inline-visual-header">
+			<h1 class="inline-visual-title">{titleText}</h1>
+		</header>
 	{/if}
 
 	{#if dek}
 		<p class="inline-visual-dek">{@render dek()}</p>
+	{:else if dekText}
+		<p class="inline-visual-dek">{dekText}</p>
 	{/if}
 
 	<div class="inline-visual-body">
@@ -19,6 +38,8 @@
 
 	{#if note}
 		<aside class="inline-visual-note">{@render note()}</aside>
+	{:else if noteText}
+		<aside class="inline-visual-note">{noteText}</aside>
 	{/if}
 
 	<footer class="inline-visual-footer">
