@@ -66,7 +66,6 @@
 
 	:global(html, body) {
 		margin: 0;
-		background: var(--color-gray-50);
 		color: var(--color-text);
 	}
 </style>
