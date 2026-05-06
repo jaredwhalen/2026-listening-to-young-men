@@ -7,6 +7,7 @@
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
+	let isEmbed = $state(false);
 
 	const isColumn = project.layout.mode === 'column';
 	const layoutStyle = `
@@ -18,6 +19,7 @@
 		// Handle responsive iframes for embeds (pym.js)
 		// Only initialize when framed to avoid unnecessary polling in standalone use.
 		if (window.self === window.top) return;
+		isEmbed = true;
 		const { default: pym } = await import('pym.js');
 		new pym.Child({ polling: 500 });
 	});
@@ -46,6 +48,7 @@
 	class="layout-root"
 	data-layout={project.layout.mode}
 	data-document={project.document.mode}
+	data-embed={isEmbed}
 	style={layoutStyle}
 >
 	{@render children?.()}
@@ -57,6 +60,11 @@
 		box-sizing: border-box;
 		padding-inline: var(--layout-padding-inline);
 		width: 100%;
+	}
+
+	/* In an iframe, allow the document to shrink so pym can report smaller heights. */
+	.layout-root[data-embed='true'] {
+		min-height: auto;
 	}
 
 	.layout-root[data-layout='column'] {
