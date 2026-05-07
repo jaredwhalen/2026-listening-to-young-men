@@ -265,13 +265,33 @@
 	>
 		{#snippet children()}
 			{#if !sectionParam}
-				<p class="err" role="alert">
-					Missing <code class="iq-code">section</code> query parameter
-					(e.g.
-					<code class="iq-code"
-						>?section=The%20Expectations%20Gap</code
-					>).
-				</p>
+				<div class="iq-landing" role="region" aria-label="Choose a section">
+					<p class="iq-landing-lede">
+						Choose a section to explore the survey results.
+					</p>
+					<ul class="iq-landing-list">
+						<li>
+							<a class="iq-landing-link" href="/dotplot-interactive?section=The%20Expectations%20Gap">
+								The Expectations Gap
+							</a>
+						</li>
+						<li>
+							<a class="iq-landing-link" href="/dotplot-interactive?section=Degrees%20of%20Doubt">
+								Degrees of Doubt
+							</a>
+						</li>
+						<li>
+							<a class="iq-landing-link" href="/dotplot-interactive?section=Connected%20but%20Alone">
+								Connected but Alone
+							</a>
+						</li>
+						<li>
+							<a class="iq-landing-link" href="/dotplot-interactive?section=Alienated%20and%20(Dis)Engaged">
+								Alienated and (Dis)Engaged
+							</a>
+						</li>
+					</ul>
+				</div>
 			{:else if !sectionRows.length}
 				<p class="err" role="alert">
 					No rows for section <strong>{sectionParam}</strong>. Known
@@ -440,6 +460,55 @@
 		padding: 0.08em 0.28em;
 		border-radius: 0.2rem;
 		background: var(--color-gray-100);
+	}
+
+	.iq-landing {
+		max-width: 46rem;
+		margin: 0.25rem auto 1.25rem;
+		padding: 0.9rem 1rem;
+		border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+		border-radius: 0.75rem;
+		background: color-mix(in srgb, var(--color-gray-100) 55%, transparent);
+	}
+
+	.iq-landing-lede {
+		margin: 0 0 0.65rem;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: 15px;
+		line-height: 1.45;
+		color: var(--chart-text, var(--color-text));
+	}
+
+	.iq-landing-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.iq-landing-link {
+		display: block;
+		padding: 0.55rem 0.7rem;
+		border-radius: 0.6rem;
+		text-decoration: none;
+		font-family: var(--chart-font-heading, var(--font-heading));
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.2;
+		color: var(--chart-text, var(--color-text));
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+	}
+
+	.iq-landing-link:hover {
+		background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+	}
+
+	.iq-landing-link:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
 	}
 
 	.iq-controls {
