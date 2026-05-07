@@ -532,6 +532,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: flex-start;
+		justify-content: space-between;
 		gap: 0.65rem 1.25rem;
 		margin-bottom: 0.85rem;
 	}
@@ -572,23 +573,29 @@
 		flex: 0 0 auto;
 		align-self: flex-start;
 		margin-top: 0.2rem;
+		margin-left: auto;
 	}
 
 	.iq-title-picker {
-		flex: 1 1 34rem;
-		min-width: min(34rem, 100%);
+		flex: 0 1 auto;
+		width: fit-content;
+		max-width: min(42rem, calc(100% - 9rem));
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
+		align-items: flex-start;
 		gap: 0.25rem;
 	}
 
 	.iq-subpart-picker {
-		width: 100%;
+		width: fit-content;
+		max-width: min(42rem, 100%);
 	}
 
 	.iq-title-dd {
 		position: relative;
-		width: 100%;
+		width: fit-content;
+		max-width: 100%;
 	}
 
 	.iq-title-dd-summary {
@@ -718,8 +725,13 @@
 	/* question/subpart labels are now handled by the title dropdown */
 
 	@media (max-width: 720px) {
+		.iq-title-picker {
+			max-width: 100%;
+		}
+
 		.iq-field--seg {
 			width: 100%;
+			margin-left: 0;
 		}
 
 		.iq-seg {
