@@ -6,7 +6,7 @@
 	/* Brand primitives (hex from guide; use --theme-* below for semantic roles) */
 	--pa-primary-teal: #318793;
 	--pa-red: #ff6364;
-	--pa-orange: #de6a40;
+	--pa-orange: #020202;
 	--pa-gold: #f9cb6c;
 	--pa-purple: #b34cdb;
 	--pa-green: #5bb785;
@@ -16,6 +16,13 @@
 	--pa-gray-medium: #c5c5c5;
 	--pa-gray-light: #f3f3f3;
 	--pa-white: #ffffff;
+
+
+	
+	--relational-trusting: var(--pa-blue); /* #2f2ca8 */
+	--relational-distrusting: var(--pa-orange); /* #de6a40 */
+	--self-driven-trusting: var(--pa-primary-teal); /* #318793 */
+	--self-driven-distrusting: var(--pa-light-blue); /* #38aad6 */
 
 	/* Typography: serif for titles/headings, sans for body/chart UI */
 	--font-body: var(--theme-font-body, "Founders Grotesk", system-ui, sans-serif);

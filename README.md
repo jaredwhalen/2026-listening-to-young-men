@@ -62,6 +62,7 @@ Typical flow: run `setup` → `npm run build` → copy **`dist/`** into **`docs/
 - `npm run build:embed` — `build` then `node tasks/generate-embed.js`
 - `npm run preview` — Local preview of the production build
 - `npm run everviz:sync` — Sync Everviz charts from a Google Sheet manifest into Everviz (creates/updates + emits `.everviz/report.md`)
+  - One chart only: `npm run everviz:sync -- --key="Figure 1.2"` or `npm run everviz:sync -- --chart-id=622316` (chart id must exist in `.everviz/chart-map.json`)
 - `npm run everviz:delete-mapped` — Delete every chart listed in `.everviz/chart-map.json` (dry-run unless you pass `--yes`)
 
 ## Everviz chart automation
@@ -79,7 +80,10 @@ This repo includes a small sync script that reads a **manifest tab** in a Google
 Optional:
 
 - `EVERVIZ_THEME_ID`: Default theme id if a row doesn’t specify one
+- `EVERVIZ_SCALE_DECIMAL_FRACTIONS`: `0` to skip multiplying 0–1 data values by 100 before upload (default: on). Per-row: `scale_decimal_fractions` in the manifest.
 - `EVERVIZ_DRY_RUN=1`: Parse everything + write report, but don’t create/update charts
+- `EVERVIZ_SYNC_KEY`: Same as `--key` — sync a single manifest row
+- `EVERVIZ_SYNC_CHART_ID`: Same as `--chart-id` — sync the chart with that Everviz id (must be in `chart-map.json`)
 - `GOOGLE_USE_AUTH=1`: Use Google Sheets API auth (recommended for non-public sheets)
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to a service account JSON file (standard Google env var)
 - `GOOGLE_SERVICE_ACCOUNT_JSON`: Inline service account JSON (stringified). Useful in CI.
@@ -92,15 +96,32 @@ Column names are case-insensitive; spaces are normalized to underscores by the s
 - **`enabled`** (optional, default true): `true/false` to include/exclude this row
 - **`title`** (optional, default `key`): Chart title
 - **`description`** (optional): Shown as the chart subtitle
-- **`source`** (optional): Used as Highcharts `credits.text`
+- **`source`** (optional): Ignored by default; every chart uses a fixed caption + credits (see below). Override with `options_json` if needed.
 - **`chart_type`** (optional, default `column`): Highcharts chart type (`bar`, `column`, `line`, `pie`, etc.)
 - **`theme_id`** (optional): Everviz theme id for this chart (overrides `EVERVIZ_THEME_ID`)
 - **`data_sheet_name`** (optional, default `key`): The sheet tab name that contains the CSV data for this chart
 - **`data_gid`** (optional): The `gid` of the data tab (legacy fallback if you prefer gids)
 - **`series_mapping_json`** (optional): JSON string for Highcharts data module `seriesMapping`
-- **`options_json`** (optional): JSON string that is deep-merged into the Highcharts `options` object
+- **`options_json`** (optional): JSON string that is deep-merged into the Highcharts `options` object (overrides defaults below)
+- **`scale_decimal_fractions`** (optional, default true): If your numeric columns use fractions like `0.46` for 46%, the sync multiplies those values by **100** before sending CSV so the Y axis can use `{value}%`. Values already greater than 1 are left as-is.
 
-The data tab should be laid out as a normal CSV table; the script sends the full tab as `options.data.csv`.
+**Defaults applied to every chart** (before `options_json`): series colors `#2f2ca8`, `#de6a40`, `#318793`, `#b34cdb`; **Y axis hidden**; **legend above** the chart; **data labels** `{y:.0f}%` on series; **tooltip** with `%` on values; **caption** “Source: Public Agenda Survey of American Men, conducted November 4–18, 2025.”; **credits** “Public Agenda” linking to [publicagenda.org](https://publicagenda.org/); values are still scaled 0–100 when using fractional sheet data (see below).
+
+**Percent values in the sheet:** Everviz/Highcharts does **not** interpret `0.5` as 50% by itself—`{value}%` would show `0.5%`. Use the scaling above or store values as `0–100` in the sheet.
+
+The data tab should be laid out as a normal CSV table; the script sends the full tab as `options.data.csv` (after optional scaling).
+
+### Locked charts (skip sync)
+
+Put manifest keys in **`.everviz/locked.csv`** (column `key`, one figure per row) to **never** create or update those charts from the sync—useful after manual edits in Everviz. Example:
+
+```csv
+key
+Figure 1.5
+Figure 1.6
+```
+
+Single-chart sync (`--key` / `--chart-id`) fails with a clear error if that chart is locked; remove it from `locked.csv` first.
 
 
 ## Project layout (source)

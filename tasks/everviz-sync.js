@@ -10,7 +10,16 @@
  *
  * Optional (env):
  * - EVERVIZ_THEME_ID: Default theme id if not in manifest row
+ * - EVERVIZ_SCALE_DECIMAL_FRACTIONS: "0" to send sheet values as-is (no ×100 on 0–1 columns)
  * - EVERVIZ_DRY_RUN: "1" to skip any writes to Everviz
+ * - EVERVIZ_SYNC_KEY: Manifest `key` (e.g. Figure 1.2) — process only that row
+ * - EVERVIZ_SYNC_CHART_ID: Everviz numeric chart_id from chart-map — process only that row
+ *
+ * CLI (overrides env when passed):
+ * - --key=Figure 1.2
+ * - --chart-id=622316
+ *
+ * Charts listed in `.everviz/locked.csv` are never created or updated (manual edits preserved).
  */
 
 // Load .env if present (Node doesn't do this automatically).
@@ -18,14 +27,22 @@ import 'dotenv/config';
 
 import fs from 'fs';
 import path from 'path';
-import { csvParse, csvFormatRows } from 'd3-dsv';
+import { csvParse, csvFormat, csvFormatRows } from 'd3-dsv';
 import { google } from 'googleapis';
 
 const ROOT = process.cwd();
 const EVERVIZ_STATE_DIR = path.join(ROOT, '.everviz');
 const EVERVIZ_MAP_PATH = path.join(EVERVIZ_STATE_DIR, 'chart-map.json');
+const LOCKED_CSV_PATH = path.join(EVERVIZ_STATE_DIR, 'locked.csv');
 const REPORT_PATH = path.join(EVERVIZ_STATE_DIR, 'report.md');
 const REPORT_CSV_PATH = path.join(EVERVIZ_STATE_DIR, 'report.csv');
+
+/** Default series colors (first series → first color, etc.). */
+const DEFAULT_SERIES_COLORS = ['#2f2ca8', '#de6a40', '#318793', '#38aad6'];
+
+const DEFAULT_CAPTION_HTML =
+	'<b>Source</b>: Public Agenda Survey of American Men, conducted November 4–18, 2025.';
+const DEFAULT_CREDITS_HREF = 'https://publicagenda.org/';
 
 function requireEnv(name) {
 	const v = process.env[name];
@@ -194,6 +211,35 @@ function resolveThemeId(row) {
 	return Number.isFinite(n) && n > 0 ? n : 71;
 }
 
+/**
+ * Highcharts/Everviz does not treat 0.5 as "50%" automatically — `{value}%` shows "0.5%".
+ * Scale values in (0, 1] on non-first columns to 0–100 so axis format `{value}%` reads correctly.
+ * Values already > 1 or non-numeric cells are left unchanged.
+ */
+function scaleFractionCsvToPercent(csv) {
+	const rows = csvParse(csv);
+	if (!rows.length) return csv;
+	const cols = rows.columns;
+	if (!cols?.length) return csv;
+
+	for (const row of rows) {
+		for (let i = 1; i < cols.length; i++) {
+			const col = cols[i];
+			const raw = row[col];
+			if (raw == null || raw === '') continue;
+			const s = String(raw).trim().replace(/%/g, '');
+			const n = Number(s);
+			if (!Number.isFinite(n)) continue;
+			if (n > 0 && n <= 1) row[col] = String(n * 100);
+		}
+	}
+	return csvFormat(rows, cols);
+}
+
+function shouldScaleDecimalFractions(row) {
+	return asBool(row.scale_decimal_fractions ?? row.scale_fractions, asBool(process.env.EVERVIZ_SCALE_DECIMAL_FRACTIONS, true));
+}
+
 function buildBaseEvervizPayload(row, csv) {
 	const title = row.title ?? row.name ?? row.key;
 	const chartType = row.chart_type ?? row.type ?? 'column';
@@ -215,9 +261,60 @@ function buildBaseEvervizPayload(row, csv) {
 
 	// Optional metadata (still minimal, but supports your manifest fields).
 	if (row.description) options.subtitle = { text: row.description };
-	if (row.source) options.credits = { enabled: true, text: row.source };
 
-	const mergedOptions = optionsOverride ? deepMerge(options, optionsOverride) : options;
+	// Brand defaults (theme unreliable via API): colors, legend, hidden Y axis, % labels + tooltip.
+	const chartDefaults = {
+		colors: DEFAULT_SERIES_COLORS.slice(),
+		caption: {
+			enabled: true,
+			useHTML: true,
+			text: DEFAULT_CAPTION_HTML,
+			align: 'left'
+		},
+		credits: {
+			enabled: true,
+			// `href` is required or Everviz/Highcharts keeps the default (everviz.com).
+			text: 'Public Agenda',
+			href: DEFAULT_CREDITS_HREF,
+			style: { color: '#318793' }
+		},
+		chart: {
+			spacingTop: 24
+		},
+		legend: {
+			align: 'center',
+			verticalAlign: 'top',
+			layout: 'horizontal',
+			x: 0,
+			y: 0
+		},
+		yAxis: {
+			visible: false,
+			labels: { enabled: false },
+			title: { text: null },
+			gridLineWidth: 0,
+			lineWidth: 0,
+			minorGridLineWidth: 0,
+			tickLength: 0
+		},
+		tooltip: {
+			shared: true,
+			headerFormat: '<span style="font-size: 11px">{point.key}</span><br/>',
+			// `valueSuffix` is ignored when `pointFormat` is set; keep % in the template.
+			pointFormat:
+				'<span style="color:{series.color}">\u25cf</span> {series.name}: <b>{point.y:.0f}%</b><br/>'
+		},
+		plotOptions: {
+			series: {
+				dataLabels: {
+					enabled: true,
+					format: '{y:.0f}%'
+				}
+			}
+		}
+	};
+	let mergedOptions = deepMerge(options, chartDefaults);
+	mergedOptions = optionsOverride ? deepMerge(mergedOptions, optionsOverride) : mergedOptions;
 
 	const data = {
 		options: mergedOptions,
@@ -238,6 +335,77 @@ function slugKey(input) {
 		.replace(/['’]/g, '')
 		.replace(/[^a-z0-9]+/g, '_')
 		.replace(/^_+|_+$/g, '');
+}
+
+/** Slugs of figures to skip (never push to Everviz). One column `key` or first column. */
+function readLockedSlugs() {
+	if (!fs.existsSync(LOCKED_CSV_PATH)) return new Set();
+	const text = fs.readFileSync(LOCKED_CSV_PATH, 'utf8').trim();
+	if (!text) return new Set();
+	const rows = csvParse(text);
+	const set = new Set();
+	for (const r of rows) {
+		const raw =
+			r.key ?? r.figure ?? r.chart_key ?? (Object.keys(r).length ? r[Object.keys(r)[0]] : null);
+		if (raw == null || raw === '') continue;
+		const s = slugKey(String(raw).trim());
+		if (s) set.add(s);
+	}
+	return set;
+}
+
+/**
+ * When set, only the manifest row matching this slug (e.g. figure_1_2) is synced.
+ * `--chart-id` resolves via chart-map.json; `--key` uses the same slug as the manifest key.
+ */
+function parseSingleChartFilter(argv, chartMap) {
+	let keyArg = process.env.EVERVIZ_SYNC_KEY?.trim() || null;
+	let chartIdArg = (() => {
+		const raw = process.env.EVERVIZ_SYNC_CHART_ID;
+		if (raw == null || raw === '') return null;
+		const n = Number(raw);
+		return Number.isFinite(n) ? n : null;
+	})();
+
+	for (const arg of argv) {
+		if (arg.startsWith('--key=')) {
+			const v = arg.slice(6).trim();
+			if (v) keyArg = v;
+		} else if (arg.startsWith('--chart-id=')) {
+			const n = Number(arg.slice('--chart-id='.length));
+			if (Number.isFinite(n)) chartIdArg = n;
+		}
+	}
+
+	let filterSlug = null;
+
+	if (chartIdArg != null) {
+		const found = Object.entries(chartMap.charts ?? {}).find(
+			([, v]) => Number(v?.chart_id) === chartIdArg
+		);
+		if (!found) {
+			throw new Error(
+				`--chart-id=${chartIdArg} not found in .everviz/chart-map.json. ` +
+					`Use --key="Figure 1.2" (your manifest key) for a row that is not in the map yet, or run a full sync once.`
+			);
+		}
+		filterSlug = found[0];
+	}
+
+	if (keyArg) {
+		const fromKey = slugKey(keyArg);
+		if (!fromKey) {
+			throw new Error(`--key produced an empty slug: "${keyArg}"`);
+		}
+		if (filterSlug && fromKey !== filterSlug) {
+			throw new Error(
+				`--key "${keyArg}" (slug ${fromKey}) does not match --chart-id ${chartIdArg} (slug ${filterSlug}).`
+			);
+		}
+		filterSlug = fromKey;
+	}
+
+	return filterSlug;
 }
 
 async function main() {
@@ -285,6 +453,16 @@ async function main() {
 		return out;
 	});
 
+	const filterSlug = parseSingleChartFilter(process.argv.slice(2), chartMap);
+	if (filterSlug) {
+		console.log(`Single-chart mode: ${filterSlug}`);
+	}
+
+	const lockedSlugs = readLockedSlugs();
+	if (lockedSlugs.size) {
+		console.log(`Locked charts (skipped): ${lockedSlugs.size} entries in ${path.relative(ROOT, LOCKED_CSV_PATH)}`);
+	}
+
 	const results = [];
 
 	for (const row of manifestRows) {
@@ -296,6 +474,18 @@ async function main() {
 			throw new Error(`Manifest row missing key/chart_key/slug. Row: ${JSON.stringify(row)}`);
 		const key = slugKey(humanKey);
 		if (!key) throw new Error(`Manifest row key produced empty slug. key="${humanKey}"`);
+
+		if (filterSlug && key !== filterSlug) continue;
+
+		if (lockedSlugs.has(key)) {
+			if (filterSlug === key) {
+				throw new Error(
+					`"${humanKey}" is in ${path.relative(ROOT, LOCKED_CSV_PATH)} — remove it from locked.csv to sync this chart.`
+				);
+			}
+			console.log(`Skip locked: ${humanKey}`);
+			continue;
+		}
 
 		const chartType = row.chart_type ?? row.type ?? 'column';
 
@@ -314,8 +504,10 @@ async function main() {
 				: googleSheetCsvUrlBySheetName({ sheetId, sheetName: dataSheetName });
 			chartCsv = await fetchText(dataUrl);
 		}
-		const desiredThemeId = resolveThemeId(row);
-		const data = buildBaseEvervizPayload({ ...row, key, human_key: humanKey }, chartCsv);
+		const chartCsvForEverviz = shouldScaleDecimalFractions(row)
+			? scaleFractionCsvToPercent(chartCsv)
+			: chartCsv;
+		const data = buildBaseEvervizPayload({ ...row, key, human_key: humanKey }, chartCsvForEverviz);
 
 		const existing = chartMap.charts[key];
 		let chartId = existing?.chart_id ?? null;
@@ -393,6 +585,17 @@ async function main() {
 			embed_iframe: embed?.iframe?.embedCode ?? embed?.iframe?.remote ?? fallbackEmbed?.iframe?.remote ?? '',
 			embed_inject: embed?.inject?.embedCode ?? embed?.inject?.remote ?? fallbackEmbed?.inject?.remote ?? ''
 		});
+	}
+
+	if (filterSlug && results.length === 0) {
+		if (lockedSlugs.has(filterSlug)) {
+			throw new Error(
+				`Single-chart slug "${filterSlug}" is in ${path.relative(ROOT, LOCKED_CSV_PATH)} — remove it there to sync.`
+			);
+		}
+		throw new Error(
+			`Single-chart mode: no manifest row matched slug "${filterSlug}". Check the manifest key column (e.g. Figure 1.2).`
+		);
 	}
 
 	fs.writeFileSync(EVERVIZ_MAP_PATH, JSON.stringify(chartMap, null, 2), 'utf8');
