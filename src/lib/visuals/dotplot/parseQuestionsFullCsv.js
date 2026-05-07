@@ -131,7 +131,8 @@ export function groupTopLevelQuestions(sectionRows) {
 		const qtext = (r.question ?? "").trim();
 		if (qtext.length > g.question.length) g.question = qtext;
 	}
-	return [...map.values()].sort((a, b) => a.qId.localeCompare(b.qId));
+	// Preserve raw CSV order: Map iteration order == first-seen order in `sectionRows`.
+	return [...map.values()];
 }
 
 /**

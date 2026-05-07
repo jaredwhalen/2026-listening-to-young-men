@@ -20,16 +20,18 @@
 
 	const padR = 18;
 	const padLMin = 168;
-	const rowH = 32;
+	const baseRowH = 32;
+	const rowLabelLineH = 16;
 	const axisTickH = 22;
-	const padB = 28;
+	const padB = 45;
 	const dotR = 5.5;
 	const allTickHalf = 9;
 	/** Stroke width (px) for “All respondents” tick on the scale */
 	const allTickW = 2;
 
 	const W = $derived(Math.max(300, containerW || 0));
-	const padL = $derived(Math.max(padLMin, Math.ceil(labelW + 14)));
+	const labelMaxW = $derived(Math.min(360, Math.floor(W * 0.48)));
+	const padL = $derived(Math.max(padLMin, Math.ceil(Math.min(labelW, labelMaxW) + 14)));
 	const chartW = $derived(Math.max(40, W - padL - padR));
 
 	const x = $derived(
@@ -51,6 +53,41 @@
 	);
 
 	const ticks = [0, 25, 50, 75, 100];
+	const tickLabelY = $derived(svgHeight - padB + 18);
+	const axisTitleY = $derived(svgHeight - 6);
+
+	function wrapWords(text, maxChars) {
+		const s = String(text ?? "").replace(/\s+/g, " ").trim();
+		if (!s) return ["—"];
+		if (!maxChars || maxChars < 10) return [s];
+		const words = s.split(" ");
+		/** @type {string[]} */
+		const lines = [];
+		let cur = "";
+		for (const w of words) {
+			if (!cur) {
+				cur = w;
+				continue;
+			}
+			if ((cur + " " + w).length <= maxChars) {
+				cur += " " + w;
+			} else {
+				lines.push(cur);
+				cur = w;
+			}
+		}
+		if (cur) lines.push(cur);
+		return lines;
+	}
+
+	const rowLabelMaxChars = $derived(() => Math.floor((padL - 22) / 6.8));
+	const rowLabelLines = $derived.by(() =>
+		rows.map((r) => wrapWords(r?.yLabel ?? "", rowLabelMaxChars())),
+	);
+	const rowLabelMaxLines = $derived(
+		Math.max(1, ...rowLabelLines.map((ls) => ls.length)),
+	);
+	const rowH = $derived(baseRowH + (rowLabelMaxLines - 1) * rowLabelLineH);
 
 	/** Legend: highlighted series only, plus one entry for the muted family. */
 	const legendEmphasized = $derived(series.filter((s) => !s.muted));
@@ -70,6 +107,8 @@
 		}
 		return [...muted, ...loud];
 	});
+
+	let hoveredLegendKey = $state("");
 
 	const tippyOptions = {
 		followCursor: true,
@@ -109,7 +148,12 @@
 <div class="iqdot" bind:clientWidth={containerW}>
 	<div class="iqdot-legend" aria-label="Series and baseline">
 		{#each legendEmphasized as s (s.key)}
-			<span class="iqdot-legend-item">
+			<span
+				class="iqdot-legend-item"
+				role="presentation"
+				onmouseenter={() => (hoveredLegendKey = s.key)}
+				onmouseleave={() => (hoveredLegendKey = "")}
+			>
 				<span class="iqdot-legend-swatch" style:background-color={s.color}></span>
 				<span class="iqdot-legend-label">{s.label}</span>
 			</span>
@@ -131,14 +175,37 @@
 			</span>
 		{/if}
 		<span class="iqdot-legend-item iqdot-legend-item--all">
-			<span class="iqdot-legend-all-icon" aria-hidden="true"></span>
+			<svg
+				class="iqdot-legend-all-icon"
+				width="13"
+				height="13"
+				viewBox="0 0 13 13"
+				aria-hidden="true"
+			>
+				<rect
+					x="3"
+					y="3"
+					width="7"
+					height="7"
+					rx="1"
+					transform="rotate(45 6.5 6.5)"
+					fill="var(--iqdot-all-marker, #8a8a8a)"
+					stroke="color-mix(in srgb, var(--iqdot-all-bar, #4a4a4a) 25%, transparent)"
+					stroke-width="1"
+				/>
+			</svg>
 			<span class="iqdot-legend-label">All respondents</span>
 		</span>
 	</div>
 
-	<span class="iqdot-label-measure" bind:clientWidth={labelW} aria-hidden="true"
-		>{longestLabel}</span
+	<span
+		class="iqdot-label-measure"
+		style:width={`${labelMaxW}px`}
+		bind:clientWidth={labelW}
+		aria-hidden="true"
 	>
+		{longestLabel}
+	</span>
 	<svg
 		class="iqdot-svg"
 		width={W}
@@ -155,7 +222,7 @@
 				x2={tx}
 				y2={svgHeight - padB}
 			/>
-			<text class="iqdot-tick" x={tx} y={svgHeight - 6} text-anchor="middle">
+			<text class="iqdot-tick" x={tx} y={tickLabelY} text-anchor="middle">
 				{t}%
 			</text>
 		{/each}
@@ -163,13 +230,14 @@
 		<text
 			class="iqdot-axis-title"
 			x={padL + chartW / 2}
-			y={svgHeight - 1}
+			y={axisTitleY}
 			text-anchor="middle"
 		>
 			{axisBottomLabel}
 		</text>
 
 		{#each rows as row, ri (ri)}
+			{@const labelLines = rowLabelLines[ri] ?? [row.yLabel]}
 			{@const y = chartTop + ri * rowH + rowH / 2}
 			<line
 				class="iqdot-row-line"
@@ -181,37 +249,53 @@
 			<text
 				class="iqdot-row-label"
 				x={padL - 8}
-				y={y}
+				y={y - ((labelLines.length - 1) * rowLabelLineH) / 2}
 				text-anchor="end"
-				dominant-baseline="middle"
 			>
-				{row.yLabel}
+				{#each labelLines as line, li (li)}
+					<tspan x={padL - 8} dy={li === 0 ? 0 : rowLabelLineH}>{line}</tspan>
+				{/each}
 			</text>
 
 			{#if row.all != null}
-				<line
-					class="iqdot-all-bar"
-					x1={x(row.all)}
-					x2={x(row.all)}
-					y1={y - allTickHalf}
-					y2={y + allTickHalf}
-					stroke-width={allTickW}
-					stroke-linecap="round"
-				/>
+				{@const ax = x(row.all)}
+				<g class="iqdot-move" style:transform={`translate(${ax}px, ${y}px)`}>
+					<rect
+						class="iqdot-all-diamond"
+						x={-4}
+						y={-4}
+						width="8"
+						height="8"
+						rx="1"
+						transform="rotate(45)"
+						style:pointer-events="all"
+						use:tippyTooltip={{
+							getContent: () => dotTooltip("", "All respondents", row.all),
+							accentColor: "var(--iqdot-all-bar)",
+							options: tippyOptions,
+						}}
+					/>
+				</g>
 			{/if}
 
 			{#each seriesPaintOrder as s (s.key)}
 				{@const v = row.series[s.key]}
 				{#if v != null}
+					{@const cx = x(v)}
 					<circle
 						class="iqdot-dot"
 						class:iqdot-dot--muted={s.muted}
-						cx={x(v)}
+						class:iqdot-dot--legend-hovered={hoveredLegendKey === s.key}
+						class:iqdot-dot--legend-dim={Boolean(
+							hoveredLegendKey && hoveredLegendKey !== s.key,
+						)}
+						cx={0}
 						cy={y}
 						r={dotR}
 						fill={s.muted ? "var(--iqdot-muted-dot)" : s.color}
 						stroke="var(--color-surface)"
 						stroke-width="1.25"
+						style:transform={`translateX(${cx}px)`}
 						style:pointer-events="all"
 						use:tippyTooltip={{
 							getContent: () =>
@@ -231,9 +315,12 @@
 <style lang="scss">
 	.iqdot {
 		--iqdot-all-bar: #4a4a4a;
+		--iqdot-all-marker: color-mix(in srgb, var(--iqdot-all-bar) 55%, white);
 		--iqdot-muted-dot: #c4c4c4;
 		--iqdot-muted-dot-opacity: 0.48;
 		--iqdot-muted-legend-opacity: 0.52;
+		--iqdot-legend-dim-opacity: 0.22;
+		--iqdot-dot-hover-stroke: #111;
 
 		position: relative;
 		width: 100%;
@@ -267,7 +354,11 @@
 	.iqdot-legend-item {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
+		gap: 0.25rem;
+	}
+
+	.iqdot-legend-item:has(.iqdot-legend-swatch):hover .iqdot-legend-label {
+		color: var(--chart-text, var(--color-text));
 	}
 
 	.iqdot-legend-item--all {
@@ -293,11 +384,8 @@
 	}
 
 	.iqdot-legend-all-icon {
-		width: 2px;
-		height: 13px;
-		border-radius: 1px;
-		background: var(--iqdot-all-bar, #4a4a4a);
 		flex-shrink: 0;
+		display: block;
 	}
 
 	.iqdot-legend-label {
@@ -309,6 +397,11 @@
 		width: 100%;
 		height: auto;
 		font-family: var(--chart-font-body, var(--font-body));
+	}
+
+	.iqdot-move,
+	.iqdot-dot {
+		transition: transform 220ms ease;
 	}
 
 	.iqdot-grid {
@@ -336,12 +429,34 @@
 		fill: var(--chart-text, var(--color-text));
 	}
 
-	.iqdot-all-bar {
-		stroke: var(--iqdot-all-bar);
+	.iqdot-all-diamond {
+		fill: var(--iqdot-all-marker);
+		stroke: color-mix(in srgb, var(--iqdot-all-bar) 25%, transparent);
+		stroke-width: 1;
+		cursor: default;
+	}
+
+	.iqdot-all-diamond:hover {
+		stroke: var(--iqdot-dot-hover-stroke);
+		stroke-width: 2;
 	}
 
 	.iqdot-dot {
 		cursor: default;
+	}
+
+	.iqdot-dot:hover {
+		stroke: var(--iqdot-dot-hover-stroke);
+		stroke-width: 2;
+	}
+
+	.iqdot-dot--legend-hovered {
+		stroke: var(--iqdot-dot-hover-stroke);
+		stroke-width: 2;
+	}
+
+	.iqdot-dot--legend-dim {
+		opacity: var(--iqdot-legend-dim-opacity);
 	}
 
 	.iqdot-dot--muted {

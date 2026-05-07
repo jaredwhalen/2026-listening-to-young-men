@@ -29,15 +29,47 @@
 		"Men 55+": "var(--pa-orange)",
 	};
 
-	const chartCopy = $derived(copy.charts?.dotplotInteractive ?? {});
+	function sectionNameToCopyKey(sectionName) {
+		// ArchieML turns object blocks into camelCase keys in `copy.json`
+		// e.g. "The Expectations Gap" -> "theExpectationsGap"
+		const raw = String(sectionName ?? "").trim();
+		if (!raw) return "";
+		const tokens = raw
+			.replace(/&/g, " and ")
+			.replace(/[()]/g, " ")
+			.replace(/[^a-zA-Z0-9]+/g, " ")
+			.trim()
+			.split(/\s+/g)
+			.filter(Boolean);
+		if (!tokens.length) return "";
+		return (
+			tokens[0].toLowerCase() +
+			tokens
+				.slice(1)
+				.map(
+					(t) => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(),
+				)
+				.join("")
+		);
+	}
 
-	const pageTitle = $derived(
-		(chartCopy.title && String(chartCopy.title).trim()) ||
-			"Interactive dot plot",
-	);
+	const chartCopy = $derived(copy.charts?.dotplotInteractive ?? {});
 
 	const sectionParam = $derived(
 		($page.url.searchParams.get("section") ?? "").trim(),
+	);
+	const sectionCopyKey = $derived(
+		sectionParam ? sectionNameToCopyKey(sectionParam) : "",
+	);
+
+	const sectionCopy = $derived(
+		sectionCopyKey ? (chartCopy.sections?.[sectionCopyKey] ?? {}) : {},
+	);
+
+	const pageTitle = $derived(
+		(sectionCopy.title && String(sectionCopy.title).trim()) ||
+			(chartCopy.title && String(chartCopy.title).trim()) ||
+			"Interactive dot plot",
 	);
 
 	const sectionRows = $derived(
@@ -48,15 +80,37 @@
 
 	const topLevelGroups = $derived(groupTopLevelQuestions(sectionRows));
 
+	let qPickerOpen = $state(false);
+	/** @type {HTMLDetailsElement | null} */
+	let qPickerEl = $state(null);
+	/** @type {HTMLDivElement | null} */
+	let qMenuEl = $state(null);
+
+	let sPickerOpen = $state(false);
+	/** @type {HTMLDetailsElement | null} */
+	let sPickerEl = $state(null);
+	/** @type {HTMLDivElement | null} */
+	let sMenuEl = $state(null);
+
 	let selectedQId = $state("");
 	let selectedSliceKey = $state("");
-	let mode = $state(/** @type {"demographic" | "typology"} */ ("demographic"));
+	let mode = $state(/** @type {"demographic" | "typology"} */ ("typology"));
+
+	/**
+	 * @typedef {{ qId: string, label: string }} QuestionOption
+	 */
+	const questionOptions = $derived.by(() =>
+		topLevelGroups.map((g) => ({
+			qId: g.qId,
+			label: topLevelQuestionMenuLabel(g, 9999),
+		})),
+	);
 
 	$effect(() => {
-		const gs = topLevelGroups;
-		if (!gs.length) return;
-		if (!selectedQId || !gs.some((g) => g.qId === selectedQId)) {
-			selectedQId = gs[0].qId;
+		const opts = questionOptions;
+		if (!opts.length) return;
+		if (!selectedQId || !opts.some((o) => o.qId === selectedQId)) {
+			selectedQId = opts[0].qId;
 		}
 	});
 
@@ -80,9 +134,7 @@
 	});
 
 	const activeSlice = $derived(
-		subpartSlices.find((s) => s.sliceKey === selectedSliceKey) ??
-			subpartSlices[0] ??
-			null,
+		subpartSlices.find((s) => s.sliceKey === selectedSliceKey) ?? subpartSlices[0] ?? null,
 	);
 
 	const allSeriesKeys = $derived([...DEMOGRAPHIC_KEYS, ...TYPOLOGY_KEYS]);
@@ -136,14 +188,69 @@
 	);
 
 	const headerTitle = $derived(
-		(chartCopy.title && String(chartCopy.title).trim()) || "",
+		(sectionCopy.title && String(sectionCopy.title).trim()) ||
+			(chartCopy.title && String(chartCopy.title).trim()) ||
+			"",
 	);
 	const headerDek = $derived(
-		(chartCopy.description && String(chartCopy.description).trim()) || "",
+		(sectionCopy.description && String(sectionCopy.description).trim()) ||
+			(chartCopy.description && String(chartCopy.description).trim()) ||
+			"",
 	);
 	const headerNote = $derived(
-		(chartCopy.note && String(chartCopy.note).trim()) || "",
+		(sectionCopy.note && String(sectionCopy.note).trim()) ||
+			(chartCopy.note && String(chartCopy.note).trim()) ||
+			"",
 	);
+
+	const selectedQuestionLabel = $derived(
+		questionOptions.find((o) => o.qId === selectedQId)?.label ?? "",
+	);
+	const selectedSubpartLabel = $derived(
+		activeSlice?.menuLabel ? String(activeSlice.menuLabel) : "",
+	);
+
+	function focusMenuItem(menuEl, idx) {
+		if (!menuEl) return;
+		const items = /** @type {HTMLButtonElement[]} */ (
+			Array.from(menuEl.querySelectorAll("button.iq-title-dd-option"))
+		);
+		const clamped = Math.max(0, Math.min(items.length - 1, idx));
+		items[clamped]?.focus();
+	}
+
+	function handleMenuKeydown(e, menuEl) {
+		const items = /** @type {HTMLButtonElement[]} */ (
+			Array.from(menuEl?.querySelectorAll("button.iq-title-dd-option") ?? [])
+		);
+		if (!items.length) return;
+		const i = items.indexOf(/** @type {HTMLButtonElement} */ (document.activeElement));
+		if (e.key === "ArrowDown") {
+			e.preventDefault();
+			focusMenuItem(menuEl, (i < 0 ? 0 : i + 1));
+		} else if (e.key === "ArrowUp") {
+			e.preventDefault();
+			focusMenuItem(menuEl, (i < 0 ? items.length - 1 : i - 1));
+		} else if (e.key === "Home") {
+			e.preventDefault();
+			focusMenuItem(menuEl, 0);
+		} else if (e.key === "End") {
+			e.preventDefault();
+			focusMenuItem(menuEl, items.length - 1);
+		} else if (e.key === "Escape") {
+			e.preventDefault();
+			// Close whichever picker owns this menu
+			if (menuEl === qMenuEl) {
+				qPickerOpen = false;
+				if (qPickerEl) qPickerEl.open = false;
+				qPickerEl?.querySelector("summary")?.focus();
+			} else if (menuEl === sMenuEl) {
+				sPickerOpen = false;
+				if (sPickerEl) sPickerEl.open = false;
+				sPickerEl?.querySelector("summary")?.focus();
+			}
+		}
+	}
 </script>
 
 <svelte:head>
@@ -151,54 +258,137 @@
 </svelte:head>
 
 <div class="page-inner">
-	<InlineVisual titleText={headerTitle} dekText={headerDek} noteText={headerNote}>
+	<InlineVisual
+		class="dotplot-interactive-visual"
+		titleText={headerTitle}
+		noteText={headerNote}
+	>
 		{#snippet children()}
 			{#if !sectionParam}
 				<p class="err" role="alert">
-					Missing <code class="iq-code">section</code> query parameter (e.g.
-					<code class="iq-code">?section=The%20Expectations%20Gap</code>).
+					Missing <code class="iq-code">section</code> query parameter
+					(e.g.
+					<code class="iq-code"
+						>?section=The%20Expectations%20Gap</code
+					>).
 				</p>
 			{:else if !sectionRows.length}
 				<p class="err" role="alert">
-					No rows for section <strong>{sectionParam}</strong>. Known sections:
+					No rows for section <strong>{sectionParam}</strong>. Known
+					sections:
 					{listSections(fullRows).join("; ") || "(none)"}.
 				</p>
 			{:else if !selectedGroup}
 				<p class="err" role="alert">No questions in this section.</p>
 			{:else}
+				{#if headerDek}
+					<p class="iq-instructions">{headerDek}</p>
+				{/if}
+
 				<div class="iq-controls">
-					<label class="iq-field iq-field--grow">
-						<span class="iq-field-label">Question</span>
-						<select class="iq-select" bind:value={selectedQId}>
-							{#each topLevelGroups as g (g.qId)}
-								<option value={g.qId}>{topLevelQuestionMenuLabel(g)}</option>
-							{/each}
-						</select>
-					</label>
-
-					{#if showSlicePicker}
-						<label class="iq-field iq-field--grow">
-							<span class="iq-field-label">Subpart</span>
-							<select class="iq-select" bind:value={selectedSliceKey}>
-								{#each subpartSlices as s (s.sliceKey)}
-									<option value={s.sliceKey}>{s.menuLabel}</option>
+					<div class="iq-title-picker">
+						<details
+							class="iq-title-dd"
+							bind:this={qPickerEl}
+							open={qPickerOpen}
+							ontoggle={(e) => {
+								qPickerOpen = e.currentTarget.open;
+								if (qPickerOpen) {
+									queueMicrotask(() => {
+										// focus selected option by default
+										const idx = questionOptions.findIndex((o) => o.qId === selectedQId);
+										focusMenuItem(qMenuEl, idx < 0 ? 0 : idx);
+									});
+								}
+							}}
+						>
+							<summary class="iq-title-dd-summary">
+								<span class="iq-title-dd-summary-text">
+									{selectedQuestionLabel || "Select a question…"}
+								</span>
+								<span class="iq-title-dd-chevron" aria-hidden="true">▾</span>
+							</summary>
+							<div
+								class="iq-title-dd-menu"
+								role="listbox"
+								tabindex="-1"
+								bind:this={qMenuEl}
+								onkeydown={(e) => handleMenuKeydown(e, qMenuEl)}
+							>
+								{#each questionOptions as opt (opt.qId)}
+									<button
+										type="button"
+										class="iq-title-dd-option"
+										data-selected={opt.qId === selectedQId}
+										onclick={() => {
+											selectedQId = opt.qId;
+											qPickerOpen = false;
+											if (qPickerEl) qPickerEl.open = false;
+										}}
+									>
+										{opt.label}
+									</button>
 								{/each}
-							</select>
-						</label>
-					{/if}
+							</div>
+						</details>
+						{#if showSlicePicker}
+							<div class="iq-subpart-picker">
+								<details
+									class="iq-title-dd iq-title-dd--subpart"
+									bind:this={sPickerEl}
+									open={sPickerOpen}
+									ontoggle={(e) => {
+										sPickerOpen = e.currentTarget.open;
+										if (sPickerOpen) {
+											queueMicrotask(() => {
+												const idx = subpartSlices.findIndex(
+													(s) => s.sliceKey === selectedSliceKey,
+												);
+												focusMenuItem(sMenuEl, idx < 0 ? 0 : idx);
+											});
+										}
+									}}
+								>
+									<summary class="iq-title-dd-summary iq-title-dd-summary--subpart">
+										<span class="iq-title-dd-summary-text">
+											{selectedSubpartLabel || "Select a subpart…"}
+										</span>
+										<span class="iq-title-dd-chevron" aria-hidden="true">▾</span>
+									</summary>
+									<div
+										class="iq-title-dd-menu"
+										role="listbox"
+										tabindex="-1"
+										bind:this={sMenuEl}
+										onkeydown={(e) => handleMenuKeydown(e, sMenuEl)}
+									>
+										{#each subpartSlices as s (s.sliceKey)}
+											<button
+												type="button"
+												class="iq-title-dd-option"
+												data-selected={s.sliceKey === selectedSliceKey}
+												onclick={() => {
+													selectedSliceKey = s.sliceKey;
+													sPickerOpen = false;
+													if (sPickerEl) sPickerEl.open = false;
+												}}
+											>
+												{s.menuLabel}
+											</button>
+										{/each}
+									</div>
+								</details>
+							</div>
+						{/if}
+					</div>
 
-					<div class="iq-field iq-field--seg" role="group" aria-label="Highlighted series">
+					<div
+						class="iq-field iq-field--seg"
+						role="group"
+						aria-label="Highlighted series"
+					>
 						<span class="iq-field-label">Highlight</span>
 						<div class="iq-seg">
-							<button
-								type="button"
-								class="iq-seg-btn"
-								data-active={mode === "demographic"}
-								aria-pressed={mode === "demographic"}
-								onclick={() => (mode = "demographic")}
-							>
-								Demographics
-							</button>
 							<button
 								type="button"
 								class="iq-seg-btn"
@@ -208,11 +398,18 @@
 							>
 								Typology
 							</button>
+							<button
+								type="button"
+								class="iq-seg-btn"
+								data-active={mode === "demographic"}
+								aria-pressed={mode === "demographic"}
+								onclick={() => (mode = "demographic")}
+							>
+								Demographics
+							</button>
 						</div>
 					</div>
 				</div>
-
-				<p class="iq-question">{chartHeading}</p>
 
 				<InteractiveMultiDotPlot
 					rows={plotRows}
@@ -248,9 +445,9 @@
 	.iq-controls {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: flex-end;
-		gap: 0.75rem 1rem;
-		margin-bottom: 0.75rem;
+		align-items: flex-start;
+		gap: 0.65rem 1.25rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.iq-field {
@@ -287,6 +484,116 @@
 
 	.iq-field--seg {
 		flex: 0 0 auto;
+		align-self: flex-start;
+		margin-top: 0.2rem;
+	}
+
+	.iq-title-picker {
+		flex: 1 1 34rem;
+		min-width: min(34rem, 100%);
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.iq-subpart-picker {
+		width: 100%;
+	}
+
+	.iq-title-dd {
+		position: relative;
+		width: 100%;
+	}
+
+	.iq-title-dd-summary {
+		list-style: none;
+		cursor: pointer;
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.2rem 0 0.25rem;
+		border-bottom: 1px solid var(--color-border);
+		font-family: var(--chart-font-heading, var(--font-heading));
+		font-size: 18px;
+		font-weight: 650;
+		line-height: 1.25;
+		color: var(--chart-text, var(--color-text));
+	}
+
+	.iq-title-dd-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.iq-title-dd-summary--subpart {
+		font-family: var(--chart-font-heading, var(--font-heading));
+		font-size: 15px;
+		font-weight: 550;
+		color: var(--chart-muted, var(--color-text-muted));
+		line-height: 1.3;
+		padding-top: 0.1rem;
+	}
+
+	.iq-title-dd-summary-text {
+		display: block;
+		white-space: normal;
+		word-break: break-word;
+	}
+
+	.iq-title-dd-chevron {
+		flex: 0 0 auto;
+		font-size: 0.95em;
+		line-height: 1;
+		color: var(--chart-muted, var(--color-text-muted));
+		transform: translateY(2px);
+	}
+
+	.iq-title-dd[open] .iq-title-dd-chevron {
+		transform: translateY(2px) rotate(180deg);
+	}
+
+	.iq-title-dd-menu {
+		position: absolute;
+		z-index: 20;
+		left: 0;
+		right: 0;
+		margin-top: 0.4rem;
+		max-height: 18rem;
+		overflow: auto;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 0.5rem;
+		box-shadow: 0 10px 26px rgb(0 0 0 / 0.14);
+		padding: 0.35rem;
+	}
+
+	.iq-title-dd-option {
+		width: 100%;
+		text-align: left;
+		padding: 0.5rem 0.6rem;
+		border: none;
+		border-radius: 0.4rem;
+		background: transparent;
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: 14px;
+		line-height: 1.25;
+		color: var(--color-text);
+		cursor: pointer;
+		white-space: normal;
+	}
+
+	.iq-title-dd-option:hover {
+		background: var(--color-gray-100);
+	}
+
+	.iq-title-dd-option[data-selected="true"] {
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+		box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 35%, transparent);
+	}
+
+	.iq-title-dd-option:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
 	}
 
 	.iq-seg {
@@ -298,7 +605,7 @@
 
 	.iq-seg-btn {
 		margin: 0;
-		padding: 0.35rem 0.75rem;
+		padding: 0.32rem 0.7rem;
 		font-family: var(--chart-font-body, var(--font-body));
 		font-size: var(--chart-fs-sm, 14px);
 		border: none;
@@ -322,12 +629,30 @@
 		outline-offset: 2px;
 	}
 
-	.iq-question {
-		margin: 0 0 0.5rem;
-		font-family: var(--chart-font-heading, var(--font-heading));
-		font-size: var(--chart-fs-md, 18px);
-		font-weight: var(--chart-weight-semibold, 600);
-		line-height: 1.3;
-		color: var(--chart-text, var(--color-text));
+	/* question/subpart labels are now handled by the title dropdown */
+
+	@media (max-width: 720px) {
+		.iq-field--seg {
+			width: 100%;
+		}
+
+		.iq-seg {
+			width: fit-content;
+		}
+	}
+
+	.iq-instructions {
+		max-width: 46rem;
+		margin: 0.1rem auto 1rem;
+		padding: 0.55rem 0.85rem;
+		border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+		border-radius: 0.6rem;
+		background: color-mix(in srgb, var(--color-gray-100) 70%, transparent);
+		font-family: var(--chart-font-body, var(--font-body));
+		font-size: 14px;
+		line-height: 1.45;
+		color: var(--chart-muted, var(--color-text-muted));
+		text-align: center;
+		text-wrap: pretty;
 	}
 </style>
