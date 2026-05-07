@@ -3,10 +3,10 @@
  * Keys match `quadrantKey(trustLevel, agency)` from parseTypologyCsv.js.
  */
 export const MATRIX_TYPOLOGY_QUADRANT_COLORS = {
-	'Trusting|Relational': 'var(--pa-blue)',
-	'Distrusting|Relational': 'var(--pa-orange)',
-	'Trusting|Self-driven': 'var(--pa-primary-teal)',
-	'Distrusting|Self-driven': 'var(--pa-purple)'
+	'Trusting|Relational': 'var(--relational-trusting)',
+	'Distrusting|Relational': 'var(--relational-distrusting)',
+	'Trusting|Self-driven': 'var(--self-driven-trusting)',
+	'Distrusting|Self-driven': 'var(--self-driven-distrusting)'
 };
 
 /**
