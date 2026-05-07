@@ -1,24 +1,27 @@
 <script>
-	import InlineVisual from '$lib/components/layout/InlineVisual.svelte';
-	import WaffleHeatmap from '$lib/visuals/waffle/WaffleHeatmap.svelte';
-	import TypologyDiffHeatmap from '$lib/visuals/waffle/TypologyDiffHeatmap.svelte';
-	import { buildTypologyCompareRows, TYPOLOGY_COMPARE_COLUMNS } from '$lib/visuals/waffle/buildTypologyCompareRows.js';
-	import { parseWaffleCsv } from '$lib/visuals/waffle/parseWaffleCsv.js';
-	import waffleRows from '$lib/data/waffle.csv';
-	import copy from '$lib/data/copy.json';
+	import InlineVisual from "$lib/components/layout/InlineVisual.svelte";
+	import WaffleHeatmap from "$lib/visuals/waffle/WaffleHeatmap.svelte";
+	import TypologyDiffHeatmap from "$lib/visuals/waffle/TypologyDiffHeatmap.svelte";
+	import {
+		buildTypologyCompareRows,
+		TYPOLOGY_COMPARE_COLUMNS,
+	} from "$lib/visuals/waffle/buildTypologyCompareRows.js";
+	import { parseWaffleCsv } from "$lib/visuals/waffle/parseWaffleCsv.js";
+	import waffleRows from "$lib/data/waffle.csv";
+	import copy from "$lib/data/copy.json";
 
 	const VIEW_MODE = {
-		demographics: 'demographics',
-		typologies: 'typologies'
+		demographics: "demographics",
+		typologies: "typologies",
 	};
 
 	const WAFFLE_TABLE = {
-		societyBelieves: 'society_believes',
-		theyBelieve: 'they_believe'
+		societyBelieves: "society_believes",
+		theyBelieve: "they_believe",
 	};
 
-	const TYPOLOGIES_CHART_LABEL_RELATIONAL = 'Relational young men';
-	const TYPOLOGIES_CHART_LABEL_SELF_DRIVEN = 'Self-driven young men';
+	const TYPOLOGIES_CHART_LABEL_RELATIONAL = "Relational young men";
+	const TYPOLOGIES_CHART_LABEL_SELF_DRIVEN = "Self-driven young men";
 
 	let viewMode = $state(VIEW_MODE.demographics);
 
@@ -28,20 +31,21 @@
 	const parsed = parseWaffleCsv(waffleRows);
 
 	const DEMOS = [
-		'All Americans',
-		'Men 18-34',
-		'Women 18-34',
-		'Men 35-54',
-		'Men 55+',
-		'Relational',
-		'Self-driven'
+		"All Americans",
+		"Men 18-34",
+		"Women 18-34",
+		"Men 35-54",
+		"Men 55+",
+		"Relational",
+		"Self-driven",
 	];
 
 	let columns = $derived.by(() => {
 		if (!parsed.ok) return DEMOS;
 		const set = new Set(parsed.columns);
 		const ordered = DEMOS.filter((c) => set.has(c));
-		for (const c of parsed.columns) if (!ordered.includes(c)) ordered.push(c);
+		for (const c of parsed.columns)
+			if (!ordered.includes(c)) ordered.push(c);
 		return ordered;
 	});
 
@@ -51,21 +55,31 @@
 	$effect(() => {
 		if (!sortDemographics && columns.length) {
 			sortDemographics = {
-				column: columns.includes('All Americans') ? 'All Americans' : columns[0],
-				dir: 'desc'
+				column: columns.includes("All Americans")
+					? "All Americans"
+					: columns[0],
+				dir: "desc",
 			};
 		}
-		if (sortDemographics && !columns.includes(sortDemographics.column) && columns.length) {
+		if (
+			sortDemographics &&
+			!columns.includes(sortDemographics.column) &&
+			columns.length
+		) {
 			sortDemographics = {
-				column: columns.includes('All Americans') ? 'All Americans' : columns[0],
-				dir: sortDemographics.dir
+				column: columns.includes("All Americans")
+					? "All Americans"
+					: columns[0],
+				dir: sortDemographics.dir,
 			};
 		}
 	});
 
 	const demographicsRowsSociety = $derived.by(() => {
 		if (!parsed.ok) return [];
-		return parsed.rows.filter((r) => r.table === WAFFLE_TABLE.societyBelieves);
+		return parsed.rows.filter(
+			(r) => r.table === WAFFLE_TABLE.societyBelieves,
+		);
 	});
 
 	const demographicsRowsThey = $derived.by(() => {
@@ -74,15 +88,16 @@
 	});
 
 	const leadDemographics =
-		'Percent of Americans who select each of the following as one of three traits they believe...';
+		"Percent of Americans who select each of the following as one of three traits they believe...";
 
 	const demographicsHeatmapLabels = {
-		[WAFFLE_TABLE.societyBelieves]: '...society most values in men today',
-		[WAFFLE_TABLE.theyBelieve]: '...are most important for men to have today'
+		[WAFFLE_TABLE.societyBelieves]: "...society most values in men today (Figure 1.1)",
+		[WAFFLE_TABLE.theyBelieve]:
+			"...are most important for men to have today (Figure 1.2)",
 	};
 
 	const leadTypologies =
-	'Percent of young men who select each of the following as one of three traits they believe are most important for men today, and the percent difference in the traits they believe society values:';
+		"Percent of young men who select each of the following as one of three traits they believe are most important for men today, and the percent difference in the traits they believe society values:";
 
 	let showNumbers = $state(true);
 	let traitColWidthDemographics = $state(null);
@@ -96,8 +111,8 @@
 		return buildTypologyCompareRows(
 			demographicsRowsThey,
 			demographicsRowsSociety,
-			'Relational',
-			parsed.traitOrder
+			"Relational",
+			parsed.traitOrder,
 		);
 	});
 
@@ -106,8 +121,8 @@
 		return buildTypologyCompareRows(
 			demographicsRowsThey,
 			demographicsRowsSociety,
-			'Self-driven',
-			parsed.traitOrder
+			"Self-driven",
+			parsed.traitOrder,
 		);
 	});
 
@@ -115,10 +130,10 @@
 		if (!parsed.ok || viewMode !== VIEW_MODE.typologies) return;
 		const cols = [...TYPOLOGY_COMPARE_COLUMNS];
 		if (!sortTypologies) {
-			sortTypologies = { column: 'Difference', dir: 'desc' };
+			sortTypologies = { column: "Difference", dir: "desc" };
 		}
 		if (sortTypologies && !cols.includes(sortTypologies.column)) {
-			sortTypologies = { column: 'Difference', dir: sortTypologies.dir };
+			sortTypologies = { column: "Difference", dir: sortTypologies.dir };
 		}
 	});
 </script>
@@ -127,16 +142,19 @@
 	<title>Waffle</title>
 </svelte:head>
 
-<svelte:window bind:innerWidth={innerWidth} />
+<svelte:window bind:innerWidth />
 
 <div class="page-inner">
 	<InlineVisual>
-		{#snippet title()}{copy.charts.waffle.title || ''} {/snippet}
-		{#snippet dek()}{copy.charts.waffle.description || ''}{/snippet}
+		{#snippet title()}{copy.charts.waffle.title || ""}
+		{/snippet}
+		{#snippet dek()}{copy.charts.waffle.description || ""}{/snippet}
 		{#snippet children()}
 			<div class="controls-bar">
 				<div class="control-cluster">
-					<span class="control-label" id="waffle-view-label">View</span>
+					<span class="control-label" id="waffle-view-label"
+						>View</span
+					>
 					<div
 						class="control-pill"
 						role="group"
@@ -145,7 +163,8 @@
 						<button
 							type="button"
 							class="control-pill-btn"
-							class:control-pill-btn--on={viewMode === VIEW_MODE.demographics}
+							class:control-pill-btn--on={viewMode ===
+								VIEW_MODE.demographics}
 							aria-pressed={viewMode === VIEW_MODE.demographics}
 							onclick={() => (viewMode = VIEW_MODE.demographics)}
 						>
@@ -154,7 +173,8 @@
 						<button
 							type="button"
 							class="control-pill-btn"
-							class:control-pill-btn--on={viewMode === VIEW_MODE.typologies}
+							class:control-pill-btn--on={viewMode ===
+								VIEW_MODE.typologies}
 							aria-pressed={viewMode === VIEW_MODE.typologies}
 							onclick={() => (viewMode = VIEW_MODE.typologies)}
 						>
@@ -164,7 +184,9 @@
 				</div>
 				{#if parsed.ok}
 					<div class="control-cluster">
-						<span class="control-label" id="waffle-values-label">Values</span>
+						<span class="control-label" id="waffle-values-label"
+							>Values</span
+						>
 						<div
 							class="control-pill"
 							role="group"
@@ -198,45 +220,67 @@
 					<h2 class="error-title">Couldn’t load the CSV</h2>
 					<p class="error-body">{parsed.error}</p>
 					<p class="error-body">
-						If this project uses Google Sheets as the source, ensure the sheet is publicly accessible, then run
-						<code>npm run gdoc</code> to regenerate <code>src/lib/data/waffle.csv</code>.
+						If this project uses Google Sheets as the source, ensure
+						the sheet is publicly accessible, then run
+						<code>npm run gdoc</code> to regenerate
+						<code>src/lib/data/waffle.csv</code>.
 					</p>
 				</section>
 			{:else if viewMode === VIEW_MODE.typologies}
 				<p class="waffle-lead">{leadTypologies}</p>
 				<div
 					class="compare compare--typologies"
-					style:--trait-col={traitColWidthTypologies ? `${traitColWidthTypologies}px` : undefined}
+					style:--trait-col={traitColWidthTypologies
+						? `${traitColWidthTypologies}px`
+						: undefined}
 				>
-					<section class="chart chart--left" aria-label={TYPOLOGIES_CHART_LABEL_RELATIONAL}>
-						<p class="chart-label">{TYPOLOGIES_CHART_LABEL_RELATIONAL}</p>
+					<section
+						class="chart chart--left"
+						aria-label={TYPOLOGIES_CHART_LABEL_RELATIONAL}
+					>
+						<p class="chart-label">
+							{TYPOLOGIES_CHART_LABEL_RELATIONAL}
+						</p>
 						<TypologyDiffHeatmap
 							rows={typologiesRowsRelational}
-							showNumbers={showNumbers}
+							{showNumbers}
 							activeHover={isDesktop ? hoverTypologies : null}
-							onHoverChange={isDesktop ? (next) => (hoverTypologies = next) : undefined}
+							onHoverChange={isDesktop
+								? (next) => (hoverTypologies = next)
+								: undefined}
 							sortColumn={sortTypologies?.column ?? null}
-							sortDir={sortTypologies?.dir ?? 'desc'}
+							sortDir={sortTypologies?.dir ?? "desc"}
 							onSort={(next) => (sortTypologies = next)}
 							onTraitColWidth={(px) => {
 								traitColWidthTypologies =
-									traitColWidthTypologies == null ? px : Math.max(traitColWidthTypologies, px);
+									traitColWidthTypologies == null
+										? px
+										: Math.max(traitColWidthTypologies, px);
 							}}
 						/>
 					</section>
-					<section class="chart chart--right" aria-label={TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}>
-						<p class="chart-label">{TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}</p>
+					<section
+						class="chart chart--right"
+						aria-label={TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}
+					>
+						<p class="chart-label">
+							{TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}
+						</p>
 						<TypologyDiffHeatmap
 							rows={typologiesRowsSelfDriven}
-							showNumbers={showNumbers}
+							{showNumbers}
 							activeHover={isDesktop ? hoverTypologies : null}
-							onHoverChange={isDesktop ? (next) => (hoverTypologies = next) : undefined}
+							onHoverChange={isDesktop
+								? (next) => (hoverTypologies = next)
+								: undefined}
 							sortColumn={sortTypologies?.column ?? null}
-							sortDir={sortTypologies?.dir ?? 'desc'}
+							sortDir={sortTypologies?.dir ?? "desc"}
 							onSort={(next) => (sortTypologies = next)}
 							onTraitColWidth={(px) => {
 								traitColWidthTypologies =
-									traitColWidthTypologies == null ? px : Math.max(traitColWidthTypologies, px);
+									traitColWidthTypologies == null
+										? px
+										: Math.max(traitColWidthTypologies, px);
 							}}
 						/>
 					</section>
@@ -245,27 +289,40 @@
 				<p class="waffle-lead">{leadDemographics}</p>
 				<div
 					class="compare"
-					style:--trait-col={traitColWidthDemographics ? `${traitColWidthDemographics}px` : undefined}
+					style:--trait-col={traitColWidthDemographics
+						? `${traitColWidthDemographics}px`
+						: undefined}
 				>
 					<section
 						class="chart chart--left"
 						aria-label={`Demographics: ${demographicsHeatmapLabels[WAFFLE_TABLE.societyBelieves]}`}
 					>
-						<p class="chart-label">{demographicsHeatmapLabels[WAFFLE_TABLE.societyBelieves]}</p>
+						<p class="chart-label">
+							{demographicsHeatmapLabels[
+								WAFFLE_TABLE.societyBelieves
+							]}
+						</p>
 						<WaffleHeatmap
 							rows={demographicsRowsSociety}
-							columns={columns}
+							{columns}
 							gapAfter={5}
 							valueSuffix="%"
-							showNumbers={showNumbers}
+							{showNumbers}
 							activeHover={isDesktop ? hoverDemographics : null}
-							onHoverChange={isDesktop ? (next) => (hoverDemographics = next) : undefined}
+							onHoverChange={isDesktop
+								? (next) => (hoverDemographics = next)
+								: undefined}
 							sortColumn={sortDemographics?.column ?? null}
-							sortDir={sortDemographics?.dir ?? 'desc'}
+							sortDir={sortDemographics?.dir ?? "desc"}
 							onSort={(next) => (sortDemographics = next)}
 							onTraitColWidth={(px) => {
 								traitColWidthDemographics =
-									traitColWidthDemographics == null ? px : Math.max(traitColWidthDemographics, px);
+									traitColWidthDemographics == null
+										? px
+										: Math.max(
+												traitColWidthDemographics,
+												px,
+											);
 							}}
 						/>
 					</section>
@@ -273,21 +330,32 @@
 						class="chart chart--right"
 						aria-label={`Demographics: ${demographicsHeatmapLabels[WAFFLE_TABLE.theyBelieve]}`}
 					>
-						<p class="chart-label">{demographicsHeatmapLabels[WAFFLE_TABLE.theyBelieve]}</p>
+						<p class="chart-label">
+							{demographicsHeatmapLabels[
+								WAFFLE_TABLE.theyBelieve
+							]}
+						</p>
 						<WaffleHeatmap
 							rows={demographicsRowsThey}
-							columns={columns}
+							{columns}
 							gapAfter={5}
 							valueSuffix="%"
-							showNumbers={showNumbers}
+							{showNumbers}
 							activeHover={isDesktop ? hoverDemographics : null}
-							onHoverChange={isDesktop ? (next) => (hoverDemographics = next) : undefined}
+							onHoverChange={isDesktop
+								? (next) => (hoverDemographics = next)
+								: undefined}
 							sortColumn={sortDemographics?.column ?? null}
-							sortDir={sortDemographics?.dir ?? 'desc'}
+							sortDir={sortDemographics?.dir ?? "desc"}
 							onSort={(next) => (sortDemographics = next)}
 							onTraitColWidth={(px) => {
 								traitColWidthDemographics =
-									traitColWidthDemographics == null ? px : Math.max(traitColWidthDemographics, px);
+									traitColWidthDemographics == null
+										? px
+										: Math.max(
+												traitColWidthDemographics,
+												px,
+											);
 							}}
 						/>
 					</section>
@@ -295,13 +363,13 @@
 			{/if}
 		{/snippet}
 		{#snippet note()}
-			{copy.charts.waffle.note || ''}
+			{copy.charts.waffle.note || ""}
 		{/snippet}
 	</InlineVisual>
 </div>
 
 <style lang="scss">
-	@import '../../lib/visuals/waffle/waffle-visual-shared.css';
+	@import "../../lib/visuals/waffle/waffle-visual-shared.css";
 
 	.page-inner {
 		width: 100%;
@@ -314,6 +382,8 @@
 		align-items: center;
 		gap: 0.85rem 1.5rem;
 		margin-bottom: 1rem;
+		margin: 0 auto 1.25rem;
+		justify-content: center;
 	}
 
 	.control-cluster {
@@ -339,7 +409,8 @@
 		padding: 0.12rem;
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--color-border) 35%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+		border: 1px solid
+			color-mix(in srgb, var(--color-border) 80%, transparent);
 		gap: 0.1rem;
 	}
 
@@ -400,7 +471,8 @@
 	.error {
 		padding: 1rem;
 		font-family: var(--font-body);
-		border: 1px solid color-mix(in srgb, var(--color-accent-2) 35%, var(--color-border));
+		border: 1px solid
+			color-mix(in srgb, var(--color-accent-2) 35%, var(--color-border));
 	}
 
 	.error-title {
