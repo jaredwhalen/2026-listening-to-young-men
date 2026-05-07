@@ -11,6 +11,8 @@
 		titleText = "",
 		dekText = "",
 		noteText = "",
+		/** When false, the “Public Agenda” footer link is omitted (e.g. compact quizzes). */
+		showBrandFooter = true,
 		class: className = "",
 	} = $props();
 </script>
@@ -42,16 +44,18 @@
 		<aside class="inline-visual-note">{@html noteText}</aside>
 	{/if}
 
-	<footer class="inline-visual-footer">
-		<a
-			class="inline-visual-brand"
-			href="https://publicagenda.org/"
-			target="_blank"
-			rel="noreferrer"
-		>
-			Public Agenda
-		</a>
-	</footer>
+	{#if showBrandFooter}
+		<footer class="inline-visual-footer">
+			<a
+				class="inline-visual-brand"
+				href="https://publicagenda.org/"
+				target="_blank"
+				rel="noreferrer"
+			>
+				Public Agenda
+			</a>
+		</footer>
+	{/if}
 </article>
 
 <style>

@@ -3,7 +3,8 @@
 		{ href: '/typology', label: 'Typology (inline)' },
 		{ href: '/waffle', label: 'Waffle' },
 		{ href: '/dotplot', label: 'Dot plot' },
-		{ href: '/dotplot-interactive', label: 'Dot plot (interactive)' }
+		{ href: '/dotplot-interactive', label: 'Dot plot (interactive)' },
+		{ href: '/section-quiz', label: 'Section quiz' }
 	];
 </script>
 
