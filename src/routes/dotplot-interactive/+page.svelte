@@ -20,6 +20,7 @@
 	import { typologyCopy } from "$lib/data/typologyCopy.js";
 	import copy from "$lib/data/copy.json";
 	import fullRows from "$lib/data/questions-full.csv";
+	import { base } from "$app/paths";
 	import { page } from "$app/stores";
 
 	const DEMO_SERIES_COLORS = {
@@ -271,22 +272,34 @@
 					</p>
 					<ul class="iq-landing-list">
 						<li>
-							<a class="iq-landing-link" href="/dotplot-interactive?section=The%20Expectations%20Gap">
+							<a
+								class="iq-landing-link"
+								href="{base}/dotplot-interactive?section=The%20Expectations%20Gap"
+							>
 								The Expectations Gap
 							</a>
 						</li>
 						<li>
-							<a class="iq-landing-link" href="/dotplot-interactive?section=Degrees%20of%20Doubt">
+							<a
+								class="iq-landing-link"
+								href="{base}/dotplot-interactive?section=Degrees%20of%20Doubt"
+							>
 								Degrees of Doubt
 							</a>
 						</li>
 						<li>
-							<a class="iq-landing-link" href="/dotplot-interactive?section=Connected%20but%20Alone">
+							<a
+								class="iq-landing-link"
+								href="{base}/dotplot-interactive?section=Connected%20but%20Alone"
+							>
 								Connected but Alone
 							</a>
 						</li>
 						<li>
-							<a class="iq-landing-link" href="/dotplot-interactive?section=Alienated%20and%20(Dis)Engaged">
+							<a
+								class="iq-landing-link"
+								href="{base}/dotplot-interactive?section=Alienated%20and%20(Dis)Engaged"
+							>
 								Alienated and (Dis)Engaged
 							</a>
 						</li>
