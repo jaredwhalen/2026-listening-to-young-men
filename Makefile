@@ -6,6 +6,7 @@ sync-docs:
 	touch docs/.nojekyll
 
 github: sync-docs
+	npm run build
 	git add -A
 	git commit -m "update github pages"
 	git push
