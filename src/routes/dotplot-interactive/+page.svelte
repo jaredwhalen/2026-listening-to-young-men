@@ -20,6 +20,7 @@
 	import { typologyCopy } from "$lib/data/typologyCopy.js";
 	import copy from "$lib/data/copy.json";
 	import fullRows from "$lib/data/questions-full.csv";
+	import { browser } from "$app/environment";
 	import { base } from "$app/paths";
 	import { page } from "$app/stores";
 
@@ -56,8 +57,11 @@
 
 	const chartCopy = $derived(copy.charts?.dotplotInteractive ?? {});
 
+	// Prerender/SSR: `url.searchParams` is not allowed; read query only in the browser.
 	const sectionParam = $derived(
-		($page.url.searchParams.get("section") ?? "").trim(),
+		browser
+			? ($page.url.searchParams.get("section") ?? "").trim()
+			: "",
 	);
 	const sectionCopyKey = $derived(
 		sectionParam ? sectionNameToCopyKey(sectionParam) : "",
