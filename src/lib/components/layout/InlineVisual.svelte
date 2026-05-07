@@ -39,7 +39,7 @@
 	{#if note}
 		<aside class="inline-visual-note">{@render note()}</aside>
 	{:else if noteText}
-		<aside class="inline-visual-note">{noteText}</aside>
+		<aside class="inline-visual-note">{@html noteText}</aside>
 	{/if}
 
 	<footer class="inline-visual-footer">
@@ -141,10 +141,10 @@
 		margin: 1.25rem 0 0;
 		padding-top: 1rem;
 		border-top: 1px solid var(--color-border);
-		font-family: var(--chart-font-body, var(--font-body));
-		font-size: 0.875rem;
-		line-height: 1.5;
-		color: var(--color-text-muted);
+		font-size: 14px;
+		font-family: FeatureDisplay-Regular-Web;
+		font-style: italic;
+		color: var(--chart-brand, var(--color-primary));
 	}
 
 	.inline-visual-footer {
