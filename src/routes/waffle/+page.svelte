@@ -91,9 +91,9 @@
 		"Percent of Americans who select each of the following as one of three traits they believe...";
 
 	const demographicsHeatmapLabels = {
-		[WAFFLE_TABLE.societyBelieves]: "...society most values in men today (Figure 1.1)",
+		[WAFFLE_TABLE.societyBelieves]: "...society most values in men today",
 		[WAFFLE_TABLE.theyBelieve]:
-			"...are most important for men to have today (Figure 1.2)",
+			"...are most important for men to have today",
 	};
 
 	const leadTypologies =
