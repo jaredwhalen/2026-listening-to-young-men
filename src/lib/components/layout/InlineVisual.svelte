@@ -8,10 +8,10 @@
 		title,
 		dek,
 		note,
-		titleText = '',
-		dekText = '',
-		noteText = '',
-		class: className = '',
+		titleText = "",
+		dekText = "",
+		noteText = "",
+		class: className = "",
 	} = $props();
 </script>
 
@@ -43,7 +43,12 @@
 	{/if}
 
 	<footer class="inline-visual-footer">
-		<a class="inline-visual-brand" href="https://publicagenda.org/" target="_blank" rel="noreferrer">
+		<a
+			class="inline-visual-brand"
+			href="https://publicagenda.org/"
+			target="_blank"
+			rel="noreferrer"
+		>
 			Public Agenda
 		</a>
 	</footer>
@@ -61,9 +66,9 @@
 		 * - Titles: FeatureDisplay-Medium-Web
 		 * - All chart UI/labels: founders-grotesk-regular
 		 * ---------------------------- */
-		--chart-font-body: founders-grotesk-regular, 'Founders Grotesk', system-ui,
-			sans-serif;
-		--chart-font-heading: FeatureDisplay-Medium-Web, 'Feature', system-ui,
+		--chart-font-body: founders-grotesk-regular, "Founders Grotesk",
+			system-ui, sans-serif;
+		--chart-font-heading: FeatureDisplay-Medium-Web, "Feature", system-ui,
 			sans-serif;
 
 		/* Brand accent */
@@ -107,15 +112,19 @@
 		font-weight: var(--chart-weight-bold, 700);
 		line-height: 1.2;
 		color: var(--chart-brand, var(--color-primary));
+		text-align: center;
 	}
 
 	.inline-visual-dek {
-		margin: 0 0 1.25rem;
 		max-width: 42rem;
-		font-family: var(--chart-font-body, var(--font-body));
+		font-size: 14px;
+		font-family: FeatureDisplay-Regular-Web;
+		font-style: italic;
 		font-size: 1.05rem;
 		line-height: 1.55;
-		color: var(--color-text-muted);
+		color: var(--chart-brand, var(--color-primary));
+		text-align: center;
+		margin: 0 auto 1.25rem;
 	}
 
 	.inline-visual-body {
@@ -124,7 +133,8 @@
 
 	/* Force sans-serif chart label anywhere we opt in */
 	.inline-visual :global(.chart-label-sans) {
-		font-family: founders-grotesk-regular, 'Founders Grotesk', system-ui, sans-serif !important;
+		font-family: founders-grotesk-regular, "Founders Grotesk", system-ui,
+			sans-serif !important;
 	}
 
 	.inline-visual-note {
