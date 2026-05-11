@@ -169,7 +169,7 @@
 				onmouseleave={() => (hoveredLegendKey = "")}
 			>
 				<span class="iqdot-legend-swatch" style:background-color={s.color}></span>
-				<span class="iqdot-legend-label">{s.label}</span>
+				<span class="iqdot-legend-label">{s.label.replaceAll(" ", "")}</span>
 			</span>
 		{/each}
 		{#if legendShowMutedFamily && legendMutedGroupName}
@@ -451,6 +451,7 @@
 
 	.iqdot-legend-label {
 		line-height: 1.2;
+		font-family: var(--chart-font-heading);
 	}
 
 	.iqdot-svg {
