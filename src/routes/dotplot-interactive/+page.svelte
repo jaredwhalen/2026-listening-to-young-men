@@ -206,6 +206,11 @@
 			(chartCopy.note && String(chartCopy.note).trim()) ||
 			"",
 	);
+	const headerSource = $derived(
+		(sectionCopy.source && String(sectionCopy.source).trim()) ||
+			(chartCopy.source && String(chartCopy.source).trim()) ||
+			"",
+	);
 
 	const selectedQuestionLabel = $derived(
 		questionOptions.find((o) => o.qId === selectedQId)?.label ?? "",
@@ -266,6 +271,7 @@
 		class="dotplot-interactive-visual"
 		titleText={headerTitle}
 		noteText={headerNote}
+		sourceText={headerSource}
 	>
 		{#snippet children()}
 			{#if !sectionParam}

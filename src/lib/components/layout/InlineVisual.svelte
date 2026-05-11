@@ -8,13 +8,19 @@
 		title,
 		dek,
 		note,
+		source,
 		titleText = "",
 		dekText = "",
 		noteText = "",
+		sourceText = "",
 		/** When false, the “Public Agenda” footer link is omitted (e.g. compact quizzes). */
 		showBrandFooter = true,
 		class: className = "",
 	} = $props();
+
+	const hasNote = $derived(Boolean(note) || Boolean(noteText));
+	const hasSource = $derived(Boolean(source) || Boolean(sourceText));
+	const hasMeta = $derived(hasNote || hasSource);
 </script>
 
 <article class="inline-visual {className}">
@@ -38,10 +44,19 @@
 		{@render children?.()}
 	</div>
 
-	{#if note}
-		<aside class="inline-visual-note">{@render note()}</aside>
-	{:else if noteText}
-		<aside class="inline-visual-note">{@html noteText}</aside>
+	{#if hasMeta}
+		<aside class="inline-visual-meta">
+			{#if note}
+				<p class="inline-visual-meta-text inline-visual-note">{@render note()}</p>
+			{:else if noteText}
+				<p class="inline-visual-meta-text inline-visual-note">{@html noteText}</p>
+			{/if}
+			{#if source}
+				<p class="inline-visual-meta-text inline-visual-source">{@render source()}</p>
+			{:else if sourceText}
+				<p class="inline-visual-meta-text inline-visual-source">{@html sourceText}</p>
+			{/if}
+		</aside>
 	{/if}
 
 	{#if showBrandFooter}
@@ -141,13 +156,25 @@
 			sans-serif !important;
 	}
 
-	.inline-visual-note {
+	/*
+	 * Meta block: note + source share one container so they sit close together
+	 * under a single divider, with note first and source immediately below it.
+	 */
+	.inline-visual-meta {
 		margin: 1.25rem 0 0;
 		padding-top: 1rem;
 		border-top: 1px solid var(--color-border);
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+	}
+
+	.inline-visual-meta-text {
+		margin: 0;
 		font-size: 14px;
 		font-family: FeatureDisplay-Regular-Web;
 		font-style: italic;
+		line-height: 1.45;
 		color: var(--chart-brand, var(--color-primary));
 	}
 

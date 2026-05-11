@@ -238,7 +238,7 @@
 						class="chart chart--left"
 						aria-label={TYPOLOGIES_CHART_LABEL_RELATIONAL}
 					>
-						<p class="chart-label">
+						<p class="chart-label large">
 							{TYPOLOGIES_CHART_LABEL_RELATIONAL}
 						</p>
 						<TypologyDiffHeatmap
@@ -263,7 +263,7 @@
 						class="chart chart--right"
 						aria-label={TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}
 					>
-						<p class="chart-label">
+						<p class="chart-label large">
 							{TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}
 						</p>
 						<TypologyDiffHeatmap
@@ -297,7 +297,7 @@
 						class="chart chart--left"
 						aria-label={`Demographics: ${demographicsHeatmapLabels[WAFFLE_TABLE.societyBelieves]}`}
 					>
-						<p class="chart-label">
+						<p class="chart-label large">
 							{demographicsHeatmapLabels[
 								WAFFLE_TABLE.societyBelieves
 							]}
@@ -330,7 +330,7 @@
 						class="chart chart--right"
 						aria-label={`Demographics: ${demographicsHeatmapLabels[WAFFLE_TABLE.theyBelieve]}`}
 					>
-						<p class="chart-label">
+						<p class="chart-label large">
 							{demographicsHeatmapLabels[
 								WAFFLE_TABLE.theyBelieve
 							]}
@@ -364,6 +364,9 @@
 		{/snippet}
 		{#snippet note()}
 			{copy.charts.waffle.note || ""}
+		{/snippet}
+		{#snippet source()}
+			{copy.charts.waffle.source || ""}
 		{/snippet}
 	</InlineVisual>
 </div>
@@ -466,6 +469,10 @@
 		font-weight: 650;
 		color: var(--color-text);
 		text-align: center;
+
+		&.large {
+			font-size: 1.1rem;
+		}
 	}
 
 	.error {
