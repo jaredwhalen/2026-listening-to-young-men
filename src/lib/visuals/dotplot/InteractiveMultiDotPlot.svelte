@@ -20,11 +20,12 @@
 
 	const padR = 18;
 	const padLMin = 168;
-	const baseRowH = 32;
+	const baseRowH = 40;
 	const rowLabelLineH = 16;
 	const axisTickH = 22;
 	const padB = 45;
-	const dotR = 5.5;
+	const dotR = 8;
+	const allDiamondHalf = 6.5;
 	const allTickHalf = 9;
 	/** Stroke width (px) for “All respondents” tick on the scale */
 	const allTickW = 2;
@@ -110,6 +111,19 @@
 
 	let hoveredLegendKey = $state("");
 
+	/**
+	 * Hovered plot symbol mirrored on the overlay layer so it visually pops above
+	 * every other symbol (SVG has no z-index, only paint order).
+	 * @type {null | {
+	 *   kind: "dot" | "all",
+	 *   cx: number,
+	 *   cy: number,
+	 *   color: string,
+	 *   muted?: boolean,
+	 * }}
+	 */
+	let hoveredSymbol = $state(null);
+
 	const tippyOptions = {
 		followCursor: true,
 		touch: ["hold", 400],
@@ -177,18 +191,18 @@
 		<span class="iqdot-legend-item iqdot-legend-item--all">
 			<svg
 				class="iqdot-legend-all-icon"
-				width="13"
-				height="13"
-				viewBox="0 0 13 13"
+				width="16"
+				height="16"
+				viewBox="0 0 16 16"
 				aria-hidden="true"
 			>
 				<rect
 					x="3"
 					y="3"
-					width="7"
-					height="7"
-					rx="1"
-					transform="rotate(45 6.5 6.5)"
+					width="10"
+					height="10"
+					rx="1.25"
+					transform="rotate(45 8 8)"
 					fill="var(--iqdot-all-marker, #8a8a8a)"
 					stroke="color-mix(in srgb, var(--iqdot-all-bar, #4a4a4a) 25%, transparent)"
 					stroke-width="1"
@@ -262,13 +276,22 @@
 				<g class="iqdot-move" style:transform={`translate(${ax}px, ${y}px)`}>
 					<rect
 						class="iqdot-all-diamond"
-						x={-4}
-						y={-4}
-						width="8"
-						height="8"
-						rx="1"
+						role="img"
+						aria-label="All respondents"
+						x={-allDiamondHalf}
+						y={-allDiamondHalf}
+						width={allDiamondHalf * 2}
+						height={allDiamondHalf * 2}
+						rx="1.25"
 						transform="rotate(45)"
 						style:pointer-events="all"
+						onmouseenter={() => (hoveredSymbol = {
+							kind: "all",
+							cx: ax,
+							cy: y,
+							color: "var(--iqdot-all-marker)",
+						})}
+						onmouseleave={() => (hoveredSymbol = null)}
 						use:tippyTooltip={{
 							getContent: () => dotTooltip("", "All respondents", row.all),
 							accentColor: "var(--iqdot-all-bar)",
@@ -289,14 +312,24 @@
 						class:iqdot-dot--legend-dim={Boolean(
 							hoveredLegendKey && hoveredLegendKey !== s.key,
 						)}
+						role="img"
+						aria-label={`${s.label}: ${fmtPct(v)}`}
 						cx={0}
 						cy={y}
 						r={dotR}
 						fill={s.muted ? "var(--iqdot-muted-dot)" : s.color}
 						stroke="var(--color-surface)"
-						stroke-width="1.25"
+						stroke-width="1.75"
 						style:transform={`translateX(${cx}px)`}
 						style:pointer-events="all"
+						onmouseenter={() => (hoveredSymbol = {
+							kind: "dot",
+							cx,
+							cy: y,
+							color: s.color,
+							muted: !!s.muted,
+						})}
+						onmouseleave={() => (hoveredSymbol = null)}
 						use:tippyTooltip={{
 							getContent: () =>
 								dotTooltip(s.group ?? "", s.label, v),
@@ -309,6 +342,34 @@
 				{/if}
 			{/each}
 		{/each}
+
+		{#if hoveredSymbol}
+			{#if hoveredSymbol.kind === "all"}
+				<g
+					class="iqdot-overlay"
+					style:transform={`translate(${hoveredSymbol.cx}px, ${hoveredSymbol.cy}px)`}
+				>
+					<rect
+						class="iqdot-all-diamond iqdot-overlay-shape"
+						x={-allDiamondHalf}
+						y={-allDiamondHalf}
+						width={allDiamondHalf * 2}
+						height={allDiamondHalf * 2}
+						rx="1.25"
+						transform="rotate(45)"
+					/>
+				</g>
+			{:else}
+				<circle
+					class="iqdot-dot iqdot-overlay-shape"
+					class:iqdot-dot--muted={hoveredSymbol.muted}
+					cx={hoveredSymbol.cx}
+					cy={hoveredSymbol.cy}
+					r={dotR}
+					fill={hoveredSymbol.muted ? "var(--iqdot-muted-dot)" : hoveredSymbol.color}
+				/>
+			{/if}
+		{/if}
 	</svg>
 </div>
 
@@ -376,8 +437,8 @@
 	}
 
 	.iqdot-legend-swatch {
-		width: 0.55rem;
-		height: 0.55rem;
+		width: 0.8rem;
+		height: 0.8rem;
 		border-radius: 50%;
 		flex-shrink: 0;
 		box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1);
@@ -461,5 +522,20 @@
 
 	.iqdot-dot--muted {
 		opacity: var(--iqdot-muted-dot-opacity);
+	}
+
+	/*
+	 * Hover overlay layer: mirrors the hovered plot symbol above all others.
+	 * Pointer-events disabled so events still reach the real symbol below
+	 * (keeps tippy attached and avoids hover flicker between two stacked nodes).
+	 */
+	.iqdot-overlay {
+		pointer-events: none;
+	}
+
+	.iqdot-overlay-shape {
+		pointer-events: none;
+		stroke: var(--iqdot-dot-hover-stroke);
+		stroke-width: 2;
 	}
 </style>

@@ -157,14 +157,15 @@
 	});
 
 	const seriesMeta = $derived.by(() => {
-		const demo = DEMOGRAPHIC_KEYS.map((k) => ({
-			key: k,
-			label: k,
-			group: "Demographics",
-			muted: mode === "typology",
-			color: DEMO_SERIES_COLORS[k] ?? "var(--color-primary)",
-		}));
-		const typo = TYPOLOGY_KEYS.map((k) => {
+		if (mode === "demographic") {
+			return DEMOGRAPHIC_KEYS.map((k) => ({
+				key: k,
+				label: k,
+				group: "Demographics",
+				color: DEMO_SERIES_COLORS[k] ?? "var(--color-primary)",
+			}));
+		}
+		return TYPOLOGY_KEYS.map((k) => {
 			const qk = typologyColumnToQuadrantKey(k);
 			const title =
 				(qk && typologyCopy.quadrantTitles?.[qk]) ||
@@ -173,11 +174,9 @@
 				key: k,
 				label: title,
 				group: "Typology",
-				muted: mode === "demographic",
 				color: colorForTypologyCsvColumn(k),
 			};
 		});
-		return [...demo, ...typo];
 	});
 
 	const chartHeading = $derived(
@@ -422,9 +421,9 @@
 					<div
 						class="iq-field iq-field--seg"
 						role="group"
-						aria-label="Highlighted series"
+						aria-label="Visible series"
 					>
-						<span class="iq-field-label">Highlight</span>
+						<span class="iq-field-label">Show</span>
 						<div class="iq-seg">
 							<button
 								type="button"
