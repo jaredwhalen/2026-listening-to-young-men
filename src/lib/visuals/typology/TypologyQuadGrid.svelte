@@ -110,7 +110,6 @@
 						<h3 class="quad-title" style:color={accent}>
 							{titleForQuadrant(q)}
 						</h3>
-						<!-- <span class="quad-head-rule" aria-hidden="true"></span> -->
 						<div class="quad-metric">
 							<span class="quad-pct" style:color={accent}>{q.quadrantPct}%</span>
 							<span class="quad-ctx" style:color={accent}>
@@ -121,20 +120,17 @@
 						</div>
 					</div>
 					{#if summaryShort}
-						<div class="quad-summary-row">
-							<p class="quad-summary">{summaryShort}</p>
-							{#if tipParams}
-								<button
-									type="button"
-									class="quad-info-tip"
-									style:color={accent}
-									aria-label={`Full description: ${titleForQuadrant(q)}`}
-									use:tippyTooltip={tipParams}
-								>
-									<Info size={17} strokeWidth={1.75} aria-hidden="true" />
-								</button>
-							{/if}
-						</div>
+						<p class="quad-summary">{@html summaryShort}{#if tipParams}{' '}<button
+								type="button"
+								class="quad-info-tip"
+								style:color={accent}
+								aria-label={`Full description: ${titleForQuadrant(q)}`}
+								use:tippyTooltip={tipParams}
+							><span class="quad-info-tip-label">More info</span><Info
+									size={14}
+									strokeWidth={2}
+									aria-hidden="true"
+								/></button>{/if}</p>
 					{/if}
 				</header>
 
@@ -356,18 +352,8 @@
 		font-style: italic;
 	}
 
-	.quad-summary-row {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.35rem;
-		margin: 0 0 0.65rem;
-		min-width: 0;
-	}
-
 	.quad-summary {
-		flex: 1;
-		min-width: 0;
-		margin: 0;
+		margin: 0 0 0.65rem;
 		padding: 0;
 		font-family: var(--chart-font-body, var(--font-body));
 		font-size: var(--chart-fs-sm, 12.5px);
@@ -375,31 +361,43 @@
 		color: var(--chart-text, var(--color-text));
 	}
 
+	/*
+	 * "More info" CTA flows at the end of the short summary like an inline link,
+	 * colored with the quadrant accent. Tooltip content is unchanged.
+	 */
 	.quad-info-tip {
-		flex-shrink: 0;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		margin: 0.12rem 0 0;
-		padding: 0.12rem;
+		gap: 0.2rem;
+		margin: 0 0 0 0.15rem;
+		padding: 0;
 		border: none;
-		border-radius: 3px;
 		background: transparent;
-		cursor: help;
-		line-height: 0;
-		opacity: 0.88;
-		transition: opacity 0.12s ease, background 0.12s ease;
+		font-family: inherit;
+		font-size: inherit;
+		font-weight: 650;
+		line-height: inherit;
+		cursor: pointer;
+		vertical-align: baseline;
+		transition: text-decoration-color 0.12s ease;
 	}
 
-	.quad-info-tip:hover {
-		opacity: 1;
-		background: color-mix(in srgb, currentColor 12%, transparent);
+	.quad-info-tip-label {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+	}
+
+	.quad-info-tip:hover .quad-info-tip-label,
+	.quad-info-tip:focus-visible .quad-info-tip-label {
+		text-decoration-color: currentColor;
 	}
 
 	.quad-info-tip:focus-visible {
 		outline: 2px solid var(--color-accent);
-		outline-offset: 1px;
-		opacity: 1;
+		outline-offset: 2px;
+		border-radius: 2px;
 	}
 
 	/* Tooltip is portaled to body; theme class lives on .tippy-box */

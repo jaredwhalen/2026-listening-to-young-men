@@ -34,13 +34,13 @@ export const typologyCopy = {
 	 */
 	quadrantShortDescription: {
 		'Trusting|Relational':
-			'Most culturally conventional. They feel the least pressure to conform to societal expectations. In general, their views align with the American mainstream.',
+			'<em><b>Most culturally conventional.</b></em> They feel the least pressure to conform to societal expectations. In general, their views align with the American mainstream.',
 		'Distrusting|Relational':
-			'Most ideologically diverse group. Find it increasingly challenging to succeed as a man. They hold egalitarian views, defining a man’s success by emphasizing emotional intelligence, equal partnerships, and compromising.',
+			'<em><b>Most ideologically diverse group.</b></em> They find it increasingly challenging to succeed as a man. They hold egalitarian views, defining a man’s success by emphasizing emotional intelligence, equal partnerships, and compromising.',
 		'Trusting|Self-driven':
-			'Largest group and lowest share of Latinos. They hold the most traditional views on manhood. They also show the least support for equal pay and opportunity.',
+			'<em><b>Largest group and lowest share of Latinos.</b></em> They hold the most traditional views on manhood. They also show the least support for equal pay and opportunity.',
 		'Distrusting|Self-driven':
-			'Most educated and most racially diverse group. They hold high expectations for themselves and for men in general. They are the most vocal about the "laziness" of modern men.'
+			'<em><b>Most educated and most racially diverse group.</b></em> They hold high expectations for themselves and for men in general. They are the most vocal about the "laziness" of modern men.'
 	},
 
 	/**

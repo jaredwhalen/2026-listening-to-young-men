@@ -16,7 +16,7 @@
 		colors = [],
 		height = '1.3rem',
 		showInnerPct = true,
-		labelMinPct = 8
+		labelMinPct = 3
 	} = $props();
 
 	const numeric = $derived(values.map((v) => Math.max(0, Number(v) || 0)));
@@ -119,8 +119,8 @@
 		pointer-events: none;
 	}
 
-	/* Hide in-bar % when the slice is too narrow (no ellipsis — clip or omit). */
-	@container bar-seg (max-width: 2.65rem) {
+	/* Hide in-bar % only when the slice is genuinely too narrow to fit the text. */
+	@container bar-seg (max-width: 1.7rem) {
 		.seg-pct {
 			display: none;
 		}
