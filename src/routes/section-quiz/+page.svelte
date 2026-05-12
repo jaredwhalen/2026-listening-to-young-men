@@ -11,14 +11,12 @@
 		traitLabelsTheyBelieve,
 		youngMenTopTraitsTheyBelieve,
 	} from "$lib/visuals/quiz/sectionQuizHelpers.js";
-	import { percentPollSurveyPercent } from "$lib/visuals/quiz/sectionQuizSurvey.js";
 	import { percentPollReaction } from "$lib/visuals/quiz/percentPollReaction.js";
 	import {
 		getSectionQuizConfig,
 		SECTION_QUIZ_ORDER,
 	} from "$lib/visuals/quiz/sectionQuizConfig.js";
 	import copy from "$lib/data/copy.json";
-	import fullRows from "$lib/data/questions-full.csv";
 	import waffleRows from "$lib/data/waffle.csv";
 	import { browser } from "$app/environment";
 	import { base } from "$app/paths";
@@ -93,7 +91,10 @@
 	);
 
 	const percentPollSurveyPct = $derived(
-		percentPollSurveyPercent(normalizedSection, fullRows),
+		quizConfig?.kind === "percentPoll" &&
+			typeof quizConfig.surveyPct === "number"
+			? quizConfig.surveyPct
+			: null,
 	);
 
 	/** @type {string[]} */
@@ -292,7 +293,6 @@
 							)}
 							<QuizPercentReveal
 								hook={reaction.hook}
-								followLine={reaction.line}
 								guessRounded={percentPollGuessRounded}
 								{surveyPct}
 								populationLabel={quizConfig.populationLabel}

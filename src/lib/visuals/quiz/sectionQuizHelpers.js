@@ -1,5 +1,3 @@
-import { parsePercentCell } from "$lib/visuals/dotplot/parseQuestionsFullCsv.js";
-
 /** Waffle table key for "traits they believe are most important". */
 export const WAFFLE_TABLE_THEY_BELIEVE = "they_believe";
 
@@ -64,30 +62,4 @@ export function traitLabelsTheyBelieve(parsed) {
 		out.push(t);
 	}
 	return out;
-}
-
-const COLLEGES_SECTION = "Degrees of Doubt";
-const COLLEGES_QID = "Q10_6";
-const AGREE_RESPONSES = new Set(["Strongly agree", "Somewhat agree"]);
-
-/**
- * Sum of "Strongly agree" + "Somewhat agree" for young men, Q10_6 (colleges / women vs men).
- * @param {Record<string, string>[]} fullRows `questions-full.csv`
- * @returns {number | null} 0–100 or null if rows missing
- */
-export function youngMenAgreeCollegesDesignedForWomenMore(fullRows) {
-	if (!Array.isArray(fullRows)) return null;
-	let sum = 0;
-	let found = 0;
-	for (const r of fullRows) {
-		if ((r.section ?? "").trim() !== COLLEGES_SECTION) continue;
-		if ((r.qId ?? "").trim() !== COLLEGES_QID) continue;
-		if (!AGREE_RESPONSES.has(String(r.response ?? "").trim())) continue;
-		const p = parsePercentCell(r["Young men"]);
-		if (p == null) continue;
-		sum += p;
-		found += 1;
-	}
-	if (found !== 2) return null;
-	return sum;
 }

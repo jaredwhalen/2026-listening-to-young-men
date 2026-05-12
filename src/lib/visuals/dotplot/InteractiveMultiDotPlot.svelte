@@ -20,12 +20,13 @@
 
 	const padR = 18;
 	const padLMin = 168;
-	const baseRowH = 40;
+	const baseRowH = 44;
 	const rowLabelLineH = 16;
 	const axisTickH = 22;
 	const padB = 45;
-	const dotR = 8;
-	const allDiamondHalf = 6.5;
+	/** 20px diameter */
+	const dotR = 10;
+	const allDiamondHalf = 8;
 	const allTickHalf = 9;
 	/** Stroke width (px) for “All respondents” tick on the scale */
 	const allTickW = 2;
@@ -109,20 +110,22 @@
 		return [...muted, ...loud];
 	});
 
-	let hoveredLegendKey = $state("");
-
 	/**
-	 * Hovered plot symbol mirrored on the overlay layer so it visually pops above
-	 * every other symbol (SVG has no z-index, only paint order).
-	 * @type {null | {
-	 *   kind: "dot" | "all",
-	 *   cx: number,
-	 *   cy: number,
-	 *   color: string,
-	 *   muted?: boolean,
-	 * }}
+	 * Legend or plot hover: highlight one series (or all-respondents) by dimming
+	 * everything else to 10% opacity. Empty string = no focus.
+	 * @type {'' | string}
 	 */
-	let hoveredSymbol = $state(null);
+	let hoveredFocus = $state("");
+
+	const ALL_FOCUS_KEY = "__all__";
+
+	function legendEnter(key) {
+		hoveredFocus = key;
+	}
+
+	function legendLeave() {
+		hoveredFocus = "";
+	}
 
 	const tippyOptions = {
 		followCursor: true,
@@ -165,15 +168,18 @@
 			<span
 				class="iqdot-legend-item"
 				role="presentation"
-				onmouseenter={() => (hoveredLegendKey = s.key)}
-				onmouseleave={() => (hoveredLegendKey = "")}
+				onmouseenter={() => legendEnter(s.key)}
+				onmouseleave={legendLeave}
 			>
 				<span class="iqdot-legend-swatch" style:background-color={s.color}></span>
 				<span class="iqdot-legend-label">{s.label.replaceAll(" ", "")}</span>
 			</span>
 		{/each}
 		{#if legendShowMutedFamily && legendMutedGroupName}
-			<span class="iqdot-legend-item iqdot-legend-item--muted-family">
+			<span
+				class="iqdot-legend-item iqdot-legend-item--muted-family"
+				role="presentation"
+			>
 				<svg
 					class="iqdot-legend-triad"
 					width="15"
@@ -188,7 +194,12 @@
 				<span class="iqdot-legend-label">{legendMutedGroupName}</span>
 			</span>
 		{/if}
-		<span class="iqdot-legend-item iqdot-legend-item--all">
+		<span
+			class="iqdot-legend-item iqdot-legend-item--all"
+			role="presentation"
+			onmouseenter={() => legendEnter(ALL_FOCUS_KEY)}
+			onmouseleave={legendLeave}
+		>
 			<svg
 				class="iqdot-legend-all-icon"
 				width="16"
@@ -204,8 +215,6 @@
 					rx="1.25"
 					transform="rotate(45 8 8)"
 					fill="var(--iqdot-all-marker, #8a8a8a)"
-					stroke="color-mix(in srgb, var(--iqdot-all-bar, #4a4a4a) 25%, transparent)"
-					stroke-width="1"
 				/>
 			</svg>
 			<span class="iqdot-legend-label">All respondents</span>
@@ -229,13 +238,6 @@
 	>
 		{#each ticks as t (t)}
 			{@const tx = x(t)}
-			<line
-				class="iqdot-grid"
-				x1={tx}
-				y1={chartTop - 4}
-				x2={tx}
-				y2={svgHeight - padB}
-			/>
 			<text class="iqdot-tick" x={tx} y={tickLabelY} text-anchor="middle">
 				{t}%
 			</text>
@@ -262,12 +264,12 @@
 			/>
 			<text
 				class="iqdot-row-label"
-				x={padL - 8}
+				x={0}
 				y={y - ((labelLines.length - 1) * rowLabelLineH) / 2}
-				text-anchor="end"
+				text-anchor="start"
 			>
 				{#each labelLines as line, li (li)}
-					<tspan x={padL - 8} dy={li === 0 ? 0 : rowLabelLineH}>{line}</tspan>
+					<tspan x={0} dy={li === 0 ? 0 : rowLabelLineH}>{line}</tspan>
 				{/each}
 			</text>
 
@@ -276,6 +278,9 @@
 				<g class="iqdot-move" style:transform={`translate(${ax}px, ${y}px)`}>
 					<rect
 						class="iqdot-all-diamond"
+						class:iqdot-all-diamond--focus-dim={Boolean(
+							hoveredFocus && hoveredFocus !== ALL_FOCUS_KEY,
+						)}
 						role="img"
 						aria-label="All respondents"
 						x={-allDiamondHalf}
@@ -285,13 +290,8 @@
 						rx="1.25"
 						transform="rotate(45)"
 						style:pointer-events="all"
-						onmouseenter={() => (hoveredSymbol = {
-							kind: "all",
-							cx: ax,
-							cy: y,
-							color: "var(--iqdot-all-marker)",
-						})}
-						onmouseleave={() => (hoveredSymbol = null)}
+						onmouseenter={() => legendEnter(ALL_FOCUS_KEY)}
+						onmouseleave={legendLeave}
 						use:tippyTooltip={{
 							getContent: () => dotTooltip("", "All respondents", row.all),
 							accentColor: "var(--iqdot-all-bar)",
@@ -308,9 +308,10 @@
 					<circle
 						class="iqdot-dot"
 						class:iqdot-dot--muted={s.muted}
-						class:iqdot-dot--legend-hovered={hoveredLegendKey === s.key}
-						class:iqdot-dot--legend-dim={Boolean(
-							hoveredLegendKey && hoveredLegendKey !== s.key,
+						class:iqdot-dot--focus-dim={Boolean(
+							hoveredFocus &&
+								(hoveredFocus === ALL_FOCUS_KEY ||
+									hoveredFocus !== s.key),
 						)}
 						role="img"
 						aria-label={`${s.label}: ${fmtPct(v)}`}
@@ -318,18 +319,10 @@
 						cy={y}
 						r={dotR}
 						fill={s.muted ? "var(--iqdot-muted-dot)" : s.color}
-						stroke="var(--color-surface)"
-						stroke-width="1.75"
 						style:transform={`translateX(${cx}px)`}
 						style:pointer-events="all"
-						onmouseenter={() => (hoveredSymbol = {
-							kind: "dot",
-							cx,
-							cy: y,
-							color: s.color,
-							muted: !!s.muted,
-						})}
-						onmouseleave={() => (hoveredSymbol = null)}
+						onmouseenter={() => legendEnter(s.key)}
+						onmouseleave={legendLeave}
 						use:tippyTooltip={{
 							getContent: () =>
 								dotTooltip(s.group ?? "", s.label, v),
@@ -342,34 +335,6 @@
 				{/if}
 			{/each}
 		{/each}
-
-		{#if hoveredSymbol}
-			{#if hoveredSymbol.kind === "all"}
-				<g
-					class="iqdot-overlay"
-					style:transform={`translate(${hoveredSymbol.cx}px, ${hoveredSymbol.cy}px)`}
-				>
-					<rect
-						class="iqdot-all-diamond iqdot-overlay-shape"
-						x={-allDiamondHalf}
-						y={-allDiamondHalf}
-						width={allDiamondHalf * 2}
-						height={allDiamondHalf * 2}
-						rx="1.25"
-						transform="rotate(45)"
-					/>
-				</g>
-			{:else}
-				<circle
-					class="iqdot-dot iqdot-overlay-shape"
-					class:iqdot-dot--muted={hoveredSymbol.muted}
-					cx={hoveredSymbol.cx}
-					cy={hoveredSymbol.cy}
-					r={dotR}
-					fill={hoveredSymbol.muted ? "var(--iqdot-muted-dot)" : hoveredSymbol.color}
-				/>
-			{/if}
-		{/if}
 	</svg>
 </div>
 
@@ -378,10 +343,11 @@
 		--iqdot-all-bar: #4a4a4a;
 		--iqdot-all-marker: color-mix(in srgb, var(--iqdot-all-bar) 55%, white);
 		--iqdot-muted-dot: #c4c4c4;
-		--iqdot-muted-dot-opacity: 0.48;
 		--iqdot-muted-legend-opacity: 0.52;
-		--iqdot-legend-dim-opacity: 0.22;
-		--iqdot-dot-hover-stroke: #111;
+		--iqdot-axis-fill: rgb(23 23 23 / 0.7);
+		--iqdot-grid-line: #e6e6e6;
+		--iqdot-dot-opacity: 0.75;
+		--iqdot-focus-dim-opacity: 0.1;
 
 		position: relative;
 		width: 100%;
@@ -394,7 +360,7 @@
 		visibility: hidden;
 		pointer-events: none;
 		white-space: nowrap;
-		font-family: var(--chart-font-body, var(--font-body));
+		font-family: var(--chart-font-heading, var(--font-heading));
 		font-size: var(--chart-fs-sm, 14px);
 		font-weight: var(--chart-weight-regular, 400);
 		line-height: 1.25;
@@ -405,6 +371,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
+		justify-content: center;
 		gap: 0.65rem 1.1rem;
 		margin: 0 0 0.5rem;
 		font-family: var(--chart-font-body, var(--font-body));
@@ -418,22 +385,10 @@
 		gap: 0.25rem;
 	}
 
-	.iqdot-legend-item:has(.iqdot-legend-swatch):hover .iqdot-legend-label {
-		color: var(--chart-text, var(--color-text));
-	}
-
-	.iqdot-legend-item--all {
-		color: var(--chart-muted, var(--color-text-muted));
-	}
-
-	.iqdot-legend-item--muted-family .iqdot-legend-label {
-		color: var(--chart-muted, var(--color-text-muted));
-	}
-
-	.iqdot-legend-triad {
-		flex-shrink: 0;
-		display: block;
-		opacity: var(--iqdot-muted-legend-opacity, 0.52);
+	.iqdot-legend-triad,
+	.iqdot-legend-swatch,
+	.iqdot-legend-all-icon {
+		opacity: var(--iqdot-dot-opacity);
 	}
 
 	.iqdot-legend-swatch {
@@ -441,9 +396,9 @@
 		height: 0.8rem;
 		border-radius: 50%;
 		flex-shrink: 0;
-		box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1);
 	}
 
+	.iqdot-legend-triad,
 	.iqdot-legend-all-icon {
 		flex-shrink: 0;
 		display: block;
@@ -458,85 +413,56 @@
 		display: block;
 		width: 100%;
 		height: auto;
-		font-family: var(--chart-font-body, var(--font-body));
 	}
 
 	.iqdot-move,
 	.iqdot-dot {
-		transition: transform 220ms ease;
-	}
-
-	.iqdot-grid {
-		stroke: var(--chart-grid, color-mix(in srgb, var(--color-border) 70%, transparent));
-		stroke-width: 1;
+		transition:
+			transform 220ms ease,
+			opacity 0.15s ease;
 	}
 
 	.iqdot-tick {
+		font-family: var(--chart-font-heading, var(--font-heading));
 		font-size: var(--chart-fs-xs, 12px);
-		fill: var(--chart-muted, var(--color-text-muted));
+		fill: var(--iqdot-axis-fill);
 	}
 
 	.iqdot-axis-title {
+		font-family: var(--chart-font-heading, var(--font-heading));
 		font-size: var(--chart-fs-xs, 12px);
-		fill: var(--chart-muted, var(--color-text-muted));
+		fill: var(--iqdot-axis-fill);
 	}
 
 	.iqdot-row-line {
-		stroke: var(--chart-grid-strong, color-mix(in srgb, var(--color-border) 88%, transparent));
+		stroke: var(--iqdot-grid-line);
 		stroke-width: 1;
 	}
 
 	.iqdot-row-label {
+		font-family: var(--chart-font-heading, var(--font-heading));
 		font-size: var(--chart-fs-sm, 14px);
 		fill: var(--chart-text, var(--color-text));
 	}
 
 	.iqdot-all-diamond {
 		fill: var(--iqdot-all-marker);
-		stroke: color-mix(in srgb, var(--iqdot-all-bar) 25%, transparent);
-		stroke-width: 1;
+		stroke: none;
 		cursor: default;
+		opacity: var(--iqdot-dot-opacity);
+		transition: opacity 0.15s ease;
 	}
 
-	.iqdot-all-diamond:hover {
-		stroke: var(--iqdot-dot-hover-stroke);
-		stroke-width: 2;
+	.iqdot-all-diamond--focus-dim {
+		opacity: var(--iqdot-focus-dim-opacity);
 	}
 
 	.iqdot-dot {
 		cursor: default;
+		opacity: var(--iqdot-dot-opacity);
 	}
 
-	.iqdot-dot:hover {
-		stroke: var(--iqdot-dot-hover-stroke);
-		stroke-width: 2;
-	}
-
-	.iqdot-dot--legend-hovered {
-		stroke: var(--iqdot-dot-hover-stroke);
-		stroke-width: 2;
-	}
-
-	.iqdot-dot--legend-dim {
-		opacity: var(--iqdot-legend-dim-opacity);
-	}
-
-	.iqdot-dot--muted {
-		opacity: var(--iqdot-muted-dot-opacity);
-	}
-
-	/*
-	 * Hover overlay layer: mirrors the hovered plot symbol above all others.
-	 * Pointer-events disabled so events still reach the real symbol below
-	 * (keeps tippy attached and avoids hover flicker between two stacked nodes).
-	 */
-	.iqdot-overlay {
-		pointer-events: none;
-	}
-
-	.iqdot-overlay-shape {
-		pointer-events: none;
-		stroke: var(--iqdot-dot-hover-stroke);
-		stroke-width: 2;
+	.iqdot-dot--focus-dim {
+		opacity: var(--iqdot-focus-dim-opacity);
 	}
 </style>
