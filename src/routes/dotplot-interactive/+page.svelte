@@ -57,6 +57,9 @@
 
 	const chartCopy = $derived(copy.charts?.dotplotInteractive ?? {});
 
+	/** Generic landmark labels (shared across sections). */
+	const IQ_A11Y_LANDING_REGION = "Interactive dot plot: choose a report section";
+
 	// Prerender/SSR: `url.searchParams` is not allowed; read query only in the browser.
 	const sectionParam = $derived(
 		browser
@@ -275,7 +278,7 @@
 	>
 		{#snippet children()}
 			{#if !sectionParam}
-				<div class="iq-landing" role="region" aria-label="Choose a section">
+				<div class="iq-landing" role="region" aria-label={IQ_A11Y_LANDING_REGION}>
 					<p class="iq-landing-lede">
 						Choose a section to explore the survey results.
 					</p>
@@ -323,14 +326,21 @@
 			{:else if !selectedGroup}
 				<p class="err" role="alert">No questions in this section.</p>
 			{:else}
+				<div
+					class="dotplot-interactive-workspace"
+					role="region"
+					aria-label="Interactive response chart"
+					aria-describedby={headerDek ? "dotplot-iq-instructions" : undefined}
+				>
 				{#if headerDek}
-					<p class="iq-instructions">{headerDek}</p>
+					<p id="dotplot-iq-instructions" class="iq-instructions">{headerDek}</p>
 				{/if}
 
 				<div class="iq-controls">
 					<div class="iq-title-picker">
 						<details
 							class="iq-title-dd"
+							aria-label="Survey question"
 							bind:this={qPickerEl}
 							open={qPickerOpen}
 							ontoggle={(e) => {
@@ -350,9 +360,11 @@
 								</span>
 								<span class="iq-title-dd-chevron" aria-hidden="true">▾</span>
 							</summary>
+							<!-- svelte-ignore a11y_no_noninteractive_element_interactions: keyboard nav between options -->
 							<div
 								class="iq-title-dd-menu"
-								role="listbox"
+								role="group"
+								aria-label="Survey question options"
 								tabindex="-1"
 								bind:this={qMenuEl}
 								onkeydown={(e) => handleMenuKeydown(e, qMenuEl)}
@@ -362,6 +374,7 @@
 										type="button"
 										class="iq-title-dd-option"
 										data-selected={opt.qId === selectedQId}
+										aria-current={opt.qId === selectedQId ? "true" : undefined}
 										onclick={() => {
 											selectedQId = opt.qId;
 											qPickerOpen = false;
@@ -377,6 +390,7 @@
 							<div class="iq-subpart-picker">
 								<details
 									class="iq-title-dd iq-title-dd--subpart"
+									aria-label="Question part"
 									bind:this={sPickerEl}
 									open={sPickerOpen}
 									ontoggle={(e) => {
@@ -397,9 +411,11 @@
 										</span>
 										<span class="iq-title-dd-chevron" aria-hidden="true">▾</span>
 									</summary>
+									<!-- svelte-ignore a11y_no_noninteractive_element_interactions: keyboard nav between options -->
 									<div
 										class="iq-title-dd-menu"
-										role="listbox"
+										role="group"
+										aria-label="Question part options"
 										tabindex="-1"
 										bind:this={sMenuEl}
 										onkeydown={(e) => handleMenuKeydown(e, sMenuEl)}
@@ -409,6 +425,9 @@
 												type="button"
 												class="iq-title-dd-option"
 												data-selected={s.sliceKey === selectedSliceKey}
+												aria-current={s.sliceKey === selectedSliceKey
+													? "true"
+													: undefined}
 												onclick={() => {
 													selectedSliceKey = s.sliceKey;
 													sPickerOpen = false;
@@ -427,7 +446,7 @@
 					<div
 						class="iq-field iq-field--seg"
 						role="group"
-						aria-label="Visible series"
+						aria-label="Chart series view"
 					>
 						<span class="iq-field-label">Show</span>
 						<div class="iq-seg">
@@ -461,6 +480,7 @@
 						chartTitle={chartTitleForPlot}
 					/>
 				</div>
+				</div>
 			{/if}
 		{/snippet}
 	</InlineVisual>
@@ -470,6 +490,10 @@
 	.page-inner {
 		width: 100%;
 		padding-block: 1.5rem 2rem;
+	}
+
+	.dotplot-interactive-workspace {
+		width: 100%;
 	}
 
 	.err {

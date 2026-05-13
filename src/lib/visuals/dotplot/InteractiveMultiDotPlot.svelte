@@ -15,6 +15,10 @@
 		chartTitle = "Response distribution by group",
 	} = $props();
 
+	const svgFigureLabel = $derived(
+		`Response dot plot: ${chartTitle}. Horizontal scale zero to one hundred percent; ${axisBottomLabel}.`,
+	);
+
 	let containerW = $state(0);
 	let labelW = $state(0);
 
@@ -159,7 +163,7 @@
 </script>
 
 <div class="iqdot" bind:clientWidth={containerW}>
-	<div class="iqdot-legend" aria-label="Series and baseline">
+	<div class="iqdot-legend" aria-label="Chart legend">
 		{#each legendEmphasized as s (s.key)}
 			<span
 				class="iqdot-legend-item"
@@ -230,7 +234,7 @@
 		width={W}
 		height={svgHeight}
 		role="img"
-		aria-label={chartTitle}
+		aria-label={svgFigureLabel}
 	>
 		{#each ticks as t (t)}
 			{@const tx = x(t)}
