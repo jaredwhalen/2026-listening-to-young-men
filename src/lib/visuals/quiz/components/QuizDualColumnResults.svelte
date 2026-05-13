@@ -13,7 +13,7 @@
 		rightTitle,
 		leftLines,
 		rightLines,
-		ariaLabel = "Comparison results",
+		ariaLabel = "Quiz results comparison",
 	} = $props();
 </script>
 

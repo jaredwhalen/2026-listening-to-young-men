@@ -173,12 +173,18 @@
 					{SECTION_QUIZ_ORDER.join("; ")}.
 				</p>
 			{:else if quizConfig.kind === "tbd"}
-				{#if headerDek}
-					<p class="quiz-instructions">{headerDek}</p>
-				{/if}
-				<p class="quiz-tbd-note" role="status">
-					This section’s quiz is still being prepared.
-				</p>
+				<div
+					class="quiz-module"
+					role="region"
+					aria-label="Interactive section quiz"
+				>
+					{#if headerDek}
+						<p class="quiz-instructions">{headerDek}</p>
+					{/if}
+					<p class="quiz-tbd-note" role="status">
+						This section’s quiz is still being prepared.
+					</p>
+				</div>
 			{:else if quizConfig.kind === "traitRank3"}
 				{#if headerDek}
 					<p class="quiz-instructions">{headerDek}</p>
@@ -187,7 +193,11 @@
 				{#if !parsedWaffle.ok}
 					<p class="err" role="alert">{parsedWaffle.error}</p>
 				{:else}
-					<div class="quiz-module">
+					<div
+						class="quiz-module"
+						role="region"
+						aria-label="Interactive section quiz"
+					>
 						<p
 							class="quiz-status-line"
 							class:quiz-status-line--secondary={traitsRevealed}
@@ -213,7 +223,6 @@
 									toggleTrait(trait);
 									traitsRevealed = false;
 								}}
-								ariaLabel="Trait choices"
 							/>
 						{/if}
 
@@ -253,7 +262,11 @@
 					<p class="quiz-instructions">{headerDek}</p>
 				{/if}
 
-				<div class="quiz-module">
+				<div
+					class="quiz-module"
+					role="region"
+					aria-label="Interactive section quiz"
+				>
 					<QuizStatement
 						eyebrow={quizConfig.statementEyebrow}
 						text={quizConfig.statementText}

@@ -7,11 +7,18 @@
 	 *   ariaLabel?: string,
 	 * }}
 	 */
-	let { options, selected, onToggle, ariaLabel = "Choices" } = $props();
+	let { options, selected, onToggle, ariaLabel = "Quiz answer choices" } = $props();
 
 	function rankOf(t) {
 		const i = selected.indexOf(t);
 		return i >= 0 ? i + 1 : 0;
+	}
+
+	function chipAriaLabel(trait) {
+		const on = selected.includes(trait);
+		if (!on) return `${trait}. Not selected. Press to add.`;
+		const r = rankOf(trait);
+		return `${trait}. Selected as choice ${r} of ${selected.length}. Press to remove.`;
 	}
 </script>
 
@@ -22,12 +29,13 @@
 			class="quiz-chip"
 			data-selected={selected.includes(trait)}
 			aria-pressed={selected.includes(trait)}
+			aria-label={chipAriaLabel(trait)}
 			onclick={() => onToggle(trait)}
 		>
 			{#if selected.includes(trait)}
-				<span class="quiz-chip-rank">{rankOf(trait)}</span>
+				<span class="quiz-chip-rank" aria-hidden="true">{rankOf(trait)}</span>
 			{/if}
-			<span class="quiz-chip-label">{trait}</span>
+			<span class="quiz-chip-label" aria-hidden="true">{trait}</span>
 		</button>
 	{/each}
 </div>

@@ -17,10 +17,11 @@
 	} = $props();
 
 	const rounded = $derived(Math.round(Number(guessPct) || 0));
+	const promptId = $derived(`${sliderId}-prompt`);
 </script>
 
-<div class="quiz-poll">
-	<p class="quiz-poll-prompt">{prompt}</p>
+<div class="quiz-poll" role="group" aria-labelledby={promptId}>
+	<p id={promptId} class="quiz-poll-prompt">{prompt}</p>
 	<div class="quiz-poll-row">
 		<label class="quiz-poll-label" for={sliderId}>{valueLabel}</label>
 		<span class="quiz-poll-value" aria-live="polite">{rounded}%</span>

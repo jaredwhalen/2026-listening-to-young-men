@@ -10,7 +10,7 @@
 	let { hook, guessRounded, surveyPct, populationLabel } = $props();
 </script>
 
-<div class="quiz-reveal" role="status">
+<div class="quiz-reveal" role="status" aria-atomic="true">
 	<p class="quiz-reveal-hook">{hook}</p>
 	<p class="quiz-reveal-lead">
 		You guessed <strong>{guessRounded}%</strong>. In our survey,

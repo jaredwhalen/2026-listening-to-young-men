@@ -6,7 +6,7 @@
 	let { sectionNames, basePath } = $props();
 </script>
 
-<div class="quiz-landing" role="region" aria-label="Choose a section">
+<div class="quiz-landing" role="region" aria-label="Section quiz menu">
 	<p class="quiz-landing-lede">Choose a report section for a quick interactive check-in.</p>
 	<ul class="quiz-landing-list">
 		{#each sectionNames as name}
