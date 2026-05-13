@@ -453,12 +453,14 @@
 					</div>
 				</div>
 
-				<InteractiveMultiDotPlot
-					rows={plotRows}
-					series={seriesMeta}
-					axisBottomLabel="% selecting"
-					chartTitle={chartTitleForPlot}
-				/>
+				<div class="dotplot-interactive-plot">
+					<InteractiveMultiDotPlot
+						rows={plotRows}
+						series={seriesMeta}
+						axisBottomLabel="% selecting"
+						chartTitle={chartTitleForPlot}
+					/>
+				</div>
 			{/if}
 		{/snippet}
 	</InlineVisual>
@@ -741,6 +743,28 @@
 
 		.iq-seg {
 			width: fit-content;
+		}
+
+		/* InteractiveMultiDotPlot: smaller plot glyphs on narrow viewports */
+		.dotplot-interactive-plot :global(.iqdot-svg circle.iqdot-dot) {
+			r: 7px;
+		}
+
+		.dotplot-interactive-plot :global(.iqdot-svg .iqdot-all-diamond) {
+			transform: rotate(45deg) scale(0.72);
+			transform-box: fill-box;
+			transform-origin: 50% 50%;
+		}
+
+		.dotplot-interactive-plot :global(.iqdot-legend-swatch) {
+			width: 0.62rem;
+			height: 0.62rem;
+		}
+
+		.dotplot-interactive-plot :global(.iqdot-legend-triad),
+		.dotplot-interactive-plot :global(.iqdot-legend-all-icon) {
+			transform: scale(0.88);
+			transform-origin: center;
 		}
 	}
 
