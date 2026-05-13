@@ -7,7 +7,8 @@
 	 *   colors: string[],
 	 *   height?: string,
 	 *   showInnerPct?: boolean,
-	 *   labelMinPct?: number
+	 *   labelMinPct?: number,
+	 *   labelPrefix?: string
 	 * }}
 	 */
 	let {
@@ -16,7 +17,8 @@
 		colors = [],
 		height = '1.3rem',
 		showInnerPct = true,
-		labelMinPct = 3
+		labelMinPct = 3,
+		labelPrefix = ''
 	} = $props();
 
 	const numeric = $derived(values.map((v) => Math.max(0, Number(v) || 0)));
@@ -25,10 +27,15 @@
 	const gridColumns = $derived(
 		total > 0 ? weights.map((w) => `minmax(0,${w}fr)`).join(' ') : '1fr'
 	);
-	const ariaLabel = $derived(
+	const distributionText = $derived(
 		labels.length && numeric.length
 			? labels.map((lab, i) => `${lab} ${numeric[i] ?? 0}%`).join(', ')
 			: 'Distribution'
+	);
+	const ariaLabel = $derived(
+		labelPrefix.trim()
+			? `${labelPrefix.trim()}: ${distributionText}`
+			: distributionText
 	);
 	const segments = $derived(
 		numeric.map((v, i) => ({

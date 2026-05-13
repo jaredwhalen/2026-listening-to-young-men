@@ -46,6 +46,20 @@
 		return colorForTypologyQuadrant(quadrantKey(q.trustLevel, q.agency));
 	}
 
+	function headingIdForQuadrant(q) {
+		return `typology-heading-${quadrantKey(q.trustLevel, q.agency).replace(/\|/g, '-')}`;
+	}
+
+	const chartSummaryLabel = $derived.by(() => {
+		const { columnLeft, columnRight, rowTop, rowBottom } = copy.axis;
+		return [
+			'Typology: young men in a two-by-two chart.',
+			`Horizontal axis: ${columnLeft} ${columnPcts.left}%, ${columnRight} ${columnPcts.right}%.`,
+			`Vertical axis: ${rowTop} ${rowPcts.top}%, ${rowBottom} ${rowPcts.bottom}%.`,
+			'Each quadrant shows that group\'s share of young men and stacked bars for ideology, race or ethnicity, education, and age.',
+		].join(' ');
+	});
+
 	function summaryTooltipParams(q) {
 		const long = longDescriptionForQuadrant(q);
 		if (!long) return null;
@@ -76,7 +90,7 @@
 	}
 </script>
 
-<div class="typology-quad" aria-label="Young men typology, two by two matrix">
+<div class="typology-quad" role="region" aria-label={chartSummaryLabel}>
 	<div class="axis axis-x" aria-hidden="true">
 		<span class="axis-x-label axis-x-left">
 			{copy.axis.columnLeft}
@@ -106,10 +120,11 @@
 			{@const accent = quadrantAccent(q)}
 			{@const summaryShort = shortDescriptionForQuadrant(q)}
 			{@const tipParams = summaryTooltipParams(q)}
-			<section class="quad-card">
+			{@const qHeadingId = headingIdForQuadrant(q)}
+			<section class="quad-card" aria-labelledby={qHeadingId}>
 				<header class="quad-head">
 					<div class="quad-headline">
-						<h3 class="quad-title" style:color={accent}>
+						<h3 class="quad-title" id={qHeadingId} style:color={accent}>
 							{titleForQuadrant(q)}
 						</h3>
 						<div class="quad-metric">
@@ -143,7 +158,7 @@
 					{/if}
 				</header>
 
-				<section>
+				<section aria-label={copy.compareSubtitle}>
 					<ul class="quad-list">
 						{#each q.attributes as attr (attr.name)}
 							{@const Icon = iconForAttribute(attr.name)}
@@ -171,6 +186,7 @@
 										labels={stackLabs}
 										colors={stackCols}
 										height="1.2rem"
+										labelPrefix={attributeHeading(attr.name)}
 									/>
 								</div>
 								<div class="spark-legend" aria-hidden="true">
