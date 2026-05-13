@@ -20,7 +20,7 @@
 		{#snippet children()}
 			{#if parsed.ok}
 				<TypologyQuadGrid
-					quadrants={parsed.quadrants}
+					quadrants={parsed.quadrants.slice(0, 4)}
 					columnPcts={parsed.columnPcts}
 					rowPcts={parsed.rowPcts}
 					copy={typologyCopy}

@@ -3,7 +3,7 @@
 	import { interpolateRgb } from 'd3-interpolate';
 	import { flip } from 'svelte/animate';
 	import { tick } from 'svelte';
-	import { tippyTooltip } from '$lib/utils/tippy.js';
+	import { evervizFloatingTooltip } from '$lib/utils/evervizFloatingTooltip.js';
 
 	let {
 		rows,
@@ -362,13 +362,12 @@
 						type="button"
 						class="cell"
 						aria-label={`${trait} · ${c}: ${formatPercent(v)}`}
-						use:tippyTooltip={{
+						use:evervizFloatingTooltip={{
 							getContent: () => tooltipContent(trait, c),
 							accentColor: '#000000',
 							options: {
 								followCursor: true,
-								touch: ['hold', 400]
-							}
+							},
 						}}
 						style:background-color={cellBg(v)}
 						data-active-row={activeTrait === trait}

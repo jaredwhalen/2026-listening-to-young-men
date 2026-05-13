@@ -3,7 +3,7 @@
 	import { interpolateRgb } from 'd3-interpolate';
 	import { flip } from 'svelte/animate';
 	import { tick } from 'svelte';
-	import { tippyTooltip } from '$lib/utils/tippy.js';
+	import { evervizFloatingTooltip } from '$lib/utils/evervizFloatingTooltip.js';
 	import { TYPOLOGY_COMPARE_COLUMNS } from '$lib/visuals/waffle/buildTypologyCompareRows.js';
 
 	const THEY = TYPOLOGY_COMPARE_COLUMNS[0];
@@ -336,13 +336,12 @@
 							class="gap"
 							data-peer-sync={isPeerSyncedCell(trait, c)}
 							aria-label={`${trait} · ${columnHeaderLabel(c)}: ${formatGapDisplay(v)}`}
-							use:tippyTooltip={{
+							use:evervizFloatingTooltip={{
 								getContent: () => tooltipContent(trait, c),
 								accentColor: '#000000',
 								options: {
 									followCursor: true,
-									touch: ['hold', 400]
-								}
+								},
 							}}
 							onmouseenter={(e) => onEnter(e, trait, c)}
 							onfocus={(e) => onEnter(e, trait, c)}
@@ -357,13 +356,12 @@
 							class="cell"
 							data-peer-sync={isPeerSyncedCell(trait, c)}
 							aria-label={`${trait} · ${columnHeaderLabel(c)}: ${formatPercent(v)}`}
-							use:tippyTooltip={{
+							use:evervizFloatingTooltip={{
 								getContent: () => tooltipContent(trait, c),
 								accentColor: '#000000',
 								options: {
 									followCursor: true,
-									touch: ['hold', 400]
-								}
+								},
 							}}
 							style:background-color={cellBg(c, v)}
 							onmouseenter={(e) => onEnter(e, trait, c)}

@@ -1,7 +1,7 @@
 <script>
 	import { scaleLinear } from 'd3-scale';
 	import { TYPOLOGY_VALUE_KEYS } from './parseQuestionsCsv.js';
-	import { tippyTooltip } from '$lib/utils/tippy.js';
+	import { evervizFloatingTooltip } from '$lib/utils/evervizFloatingTooltip.js';
 
 	/**
 	 * @type {{
@@ -283,11 +283,15 @@
 					fill={colorA}
 					stroke="var(--color-surface)"
 					stroke-width="1.5"
-					use:tippyTooltip={{
+					use:evervizFloatingTooltip={{
 						getContent: () =>
 							dotTooltipContent(r.label, questionA.text, fmtPct(r.a)),
 						accentColor: colorA,
-						options: { followCursor: true, touch: ['hold', 400] }
+						options: {
+							followCursor: true,
+							appendTo: () => document.body,
+							popperOptions: { strategy: 'fixed' },
+						},
 					}}
 				/>
 				<circle
@@ -298,11 +302,15 @@
 					fill={colorB}
 					stroke="var(--color-surface)"
 					stroke-width="1.5"
-					use:tippyTooltip={{
+					use:evervizFloatingTooltip={{
 						getContent: () =>
 							dotTooltipContent(r.label, questionB.text, fmtPct(r.b)),
 						accentColor: colorB,
-						options: { followCursor: true, touch: ['hold', 400] }
+						options: {
+							followCursor: true,
+							appendTo: () => document.body,
+							popperOptions: { strategy: 'fixed' },
+						},
 					}}
 				/>
 

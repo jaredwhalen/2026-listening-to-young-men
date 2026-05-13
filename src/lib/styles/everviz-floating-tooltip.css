@@ -1,0 +1,167 @@
+/* Everviz / Highcharts-like floating tooltip (Floating UI), not tippy.js.
+ * Series accent: --tooltip-accent on .everviz-floating-tooltip
+ */
+
+.everviz-floating-tooltip {
+	--tooltip-accent: #000;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 12000;
+	overflow: visible;
+	width: max-content;
+	max-width: min(var(--everviz-tooltip-max-width, 320px), calc(100vw - 16px));
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1.5px solid var(--tooltip-accent);
+	color: #000;
+	border-radius: 2px;
+	box-shadow: 0 4px 14px -2px rgba(0, 8, 16, 0.14);
+	font-family: var(
+		--chart-font-body,
+		founders-grotesk-regular,
+		'Founders Grotesk',
+		system-ui,
+		sans-serif
+	);
+	font-size: 12px;
+	line-height: 1.25;
+	pointer-events: auto;
+	box-sizing: border-box;
+}
+
+.everviz-floating-tooltip__inner {
+	padding: 0.4rem 0.5rem;
+}
+
+.everviz-floating-tooltip__arrow {
+	/*
+	 * Outline arrow: accent `::before`, white `::after`.
+	 * Stroke = rim between them: roughly `--arrow-outline` minus `--arrow-fill` (same units).
+	 * Thicker stroke → raise `--arrow-outline` and/or lower `--arrow-fill`.
+	 * `--arrow-fill-inset` slides the white triangle toward the panel (alignment vs stroke width).
+	 */
+	--arrow-outline: 8px;
+	--arrow-fill: 6px;
+	--arrow-fill-inset: 2px;
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	pointer-events: none;
+	z-index: 2;
+}
+
+.everviz-floating-tooltip[data-placement^='top'] .everviz-floating-tooltip__arrow {
+	transform: translateY(1px);
+}
+.everviz-floating-tooltip[data-placement^='bottom'] .everviz-floating-tooltip__arrow {
+	transform: translateY(-1px);
+}
+.everviz-floating-tooltip[data-placement^='left'] .everviz-floating-tooltip__arrow {
+	transform: translateX(1px);
+}
+.everviz-floating-tooltip[data-placement^='right'] .everviz-floating-tooltip__arrow {
+	transform: translateX(-1px);
+}
+
+.everviz-floating-tooltip__arrow::before,
+.everviz-floating-tooltip__arrow::after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-color: transparent;
+}
+
+/* `top`: tooltip above ref → arrow on bottom, tip points down */
+.everviz-floating-tooltip[data-placement^='top'] .everviz-floating-tooltip__arrow::before {
+	left: 50%;
+	bottom: 0;
+	transform: translateX(-50%);
+	border-left-width: var(--arrow-outline);
+	border-right-width: var(--arrow-outline);
+	border-top-width: var(--arrow-outline);
+	border-bottom-width: 0;
+	border-top-color: var(--tooltip-accent);
+}
+.everviz-floating-tooltip[data-placement^='top'] .everviz-floating-tooltip__arrow::after {
+	left: 50%;
+	bottom: var(--arrow-fill-inset);
+	transform: translateX(-50%);
+	border-left-width: var(--arrow-fill);
+	border-right-width: var(--arrow-fill);
+	border-top-width: var(--arrow-fill);
+	border-bottom-width: 0;
+	border-top-color: #fff;
+}
+
+/* `bottom`: tooltip below ref → arrow on top, tip points up */
+.everviz-floating-tooltip[data-placement^='bottom'] .everviz-floating-tooltip__arrow::before {
+	left: 50%;
+	top: 0;
+	transform: translateX(-50%);
+	border-left-width: var(--arrow-outline);
+	border-right-width: var(--arrow-outline);
+	border-bottom-width: var(--arrow-outline);
+	border-top-width: 0;
+	border-bottom-color: var(--tooltip-accent);
+}
+.everviz-floating-tooltip[data-placement^='bottom'] .everviz-floating-tooltip__arrow::after {
+	left: 50%;
+	top: var(--arrow-fill-inset);
+	transform: translateX(-50%);
+	border-left-width: var(--arrow-fill);
+	border-right-width: var(--arrow-fill);
+	border-bottom-width: var(--arrow-fill);
+	border-top-width: 0;
+	border-bottom-color: #fff;
+}
+
+/* `left`: tooltip left of ref → arrow on right, tip points right */
+.everviz-floating-tooltip[data-placement^='left'] .everviz-floating-tooltip__arrow::before {
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+	border-top-width: var(--arrow-outline);
+	border-bottom-width: var(--arrow-outline);
+	border-right-width: var(--arrow-outline);
+	border-left-width: 0;
+	border-right-color: var(--tooltip-accent);
+}
+.everviz-floating-tooltip[data-placement^='left'] .everviz-floating-tooltip__arrow::after {
+	top: 50%;
+	right: var(--arrow-fill-inset);
+	transform: translateY(-50%);
+	border-top-width: var(--arrow-fill);
+	border-bottom-width: var(--arrow-fill);
+	border-right-width: var(--arrow-fill);
+	border-left-width: 0;
+	border-right-color: #fff;
+}
+
+/* `right`: tooltip right of ref → arrow on left, tip points left */
+.everviz-floating-tooltip[data-placement^='right'] .everviz-floating-tooltip__arrow::before {
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	border-top-width: var(--arrow-outline);
+	border-bottom-width: var(--arrow-outline);
+	border-left-width: var(--arrow-outline);
+	border-right-width: 0;
+	border-left-color: var(--tooltip-accent);
+}
+.everviz-floating-tooltip[data-placement^='right'] .everviz-floating-tooltip__arrow::after {
+	top: 50%;
+	left: var(--arrow-fill-inset);
+	transform: translateY(-50%);
+	border-top-width: var(--arrow-fill);
+	border-bottom-width: var(--arrow-fill);
+	border-left-width: var(--arrow-fill);
+	border-right-width: 0;
+	border-left-color: #fff;
+}
+
+.everviz-floating-tooltip-title,
+.everviz-tooltip-title {
+	font-weight: 700;
+	margin: 0 0 0.2rem;
+}

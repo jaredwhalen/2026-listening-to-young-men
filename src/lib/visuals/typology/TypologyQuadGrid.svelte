@@ -12,7 +12,7 @@
 		colorsForMatrixAttribute,
 		colorForTypologyQuadrant,
 	} from "./typologyDemoColors.js";
-	import { tippyTooltip } from "$lib/utils/tippy.js";
+	import { evervizFloatingTooltip } from "$lib/utils/evervizFloatingTooltip.js";
 
 	const ICONS = { Scale, Users, GraduationCap, Calendar };
 
@@ -55,7 +55,8 @@
 				const wrap = document.createElement("div");
 				wrap.className = "matrix-typology-tooltip";
 				const head = document.createElement("div");
-				head.className = "everviz-tooltip-title matrix-typology-tooltip__title";
+				head.className =
+					"everviz-tooltip-title matrix-typology-tooltip__title";
 				head.textContent = groupTitle;
 				const body = document.createElement("p");
 				body.className = "matrix-typology-tooltip__body";
@@ -65,10 +66,11 @@
 			},
 			accentColor: quadrantAccent(q),
 			options: {
-				trigger: "mouseenter focus",
 				maxWidth: 440,
 				interactive: true,
-				appendTo: () => document.body,
+				popperOptions: {
+					strategy: "fixed",
+				},
 			},
 		};
 	}
@@ -111,7 +113,9 @@
 							{titleForQuadrant(q)}
 						</h3>
 						<div class="quad-metric">
-							<span class="quad-pct" style:color={accent}>{q.quadrantPct}%</span>
+							<span class="quad-pct" style:color={accent}
+								>{q.quadrantPct}%</span
+							>
 							<span class="quad-ctx" style:color={accent}>
 								{#each copy.metricContext as line, i (i)}
 									<span class="quad-ctx-line">{line}</span>
@@ -120,24 +124,26 @@
 						</div>
 					</div>
 					{#if summaryShort}
-						<p class="quad-summary">{@html summaryShort}{#if tipParams}{' '}<button
-								type="button"
-								class="quad-info-tip"
-								style:color={accent}
-								aria-label={`Full description: ${titleForQuadrant(q)}`}
-								use:tippyTooltip={tipParams}
-							><span class="quad-info-tip-label">More info</span><Info
-									size={14}
-									strokeWidth={2}
-									aria-hidden="true"
-								/></button>{/if}</p>
+						<p class="quad-summary">
+							{@html summaryShort}{#if tipParams}{" "}<button
+									type="button"
+									class="quad-info-tip"
+									style:color={accent}
+									aria-label={`Full description: ${titleForQuadrant(q)}`}
+									use:evervizFloatingTooltip={tipParams}
+									><span class="quad-info-tip-label"
+										>More info</span
+									><Info
+										size={14}
+										strokeWidth={2}
+										aria-hidden="true"
+									/></button
+								>{/if}
+						</p>
 					{/if}
 				</header>
 
 				<section>
-					<p class="quad-sub">
-						<!-- {copy.compareSubtitle} -->
-					</p>
 					<ul class="quad-list">
 						{#each q.attributes as attr (attr.name)}
 							{@const Icon = iconForAttribute(attr.name)}
@@ -184,9 +190,6 @@
 										</span>
 									{/each}
 								</div>
-								<!-- {#if notes.length}
-									<p class="quad-note">{notes.join(' ')}</p>
-								{/if} -->
 							</li>
 						{/each}
 					</ul>
@@ -386,7 +389,11 @@
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
 		text-underline-offset: 2px;
-		text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+		text-decoration-color: color-mix(
+			in srgb,
+			currentColor 50%,
+			transparent
+		);
 	}
 
 	.quad-info-tip:hover .quad-info-tip-label,
@@ -400,8 +407,7 @@
 		border-radius: 2px;
 	}
 
-	/* Tooltip is portaled to body; theme class lives on .tippy-box */
-	:global(.tippy-box[data-theme~="everviz"] .matrix-typology-tooltip__title) {
+	:global(.everviz-floating-tooltip .matrix-typology-tooltip__title) {
 		font-size: 13px;
 		font-weight: 800;
 		line-height: 1.25;
@@ -409,7 +415,7 @@
 		letter-spacing: 0.01em;
 	}
 
-	:global(.tippy-box[data-theme~="everviz"] .matrix-typology-tooltip__body) {
+	:global(.everviz-floating-tooltip .matrix-typology-tooltip__body) {
 		margin: 0;
 		font-weight: 400;
 		font-size: 12px;

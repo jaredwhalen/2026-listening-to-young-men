@@ -1,6 +1,6 @@
 <script>
 	import { scaleLinear } from "d3-scale";
-	import { tippyTooltip } from "$lib/utils/tippy.js";
+	import { evervizFloatingTooltip } from "$lib/utils/evervizFloatingTooltip.js";
 
 	/**
 	 * @typedef {{ yLabel: string, all: number | null, series: Record<string, number | null> }} DotRow
@@ -127,11 +127,10 @@
 		hoveredFocus = "";
 	}
 
-	const tippyOptions = {
+	const tooltipOptions = {
 		followCursor: true,
-		touch: ["hold", 400],
-		/** SVG cannot host HTML poppers; default appendTo (svg parent) breaks tooltips. */
 		appendTo: () => document.body,
+		popperOptions: { strategy: 'fixed' },
 	};
 
 	const percentFmt = new Intl.NumberFormat(undefined, {
@@ -292,10 +291,10 @@
 						style:pointer-events="all"
 						onmouseenter={() => legendEnter(ALL_FOCUS_KEY)}
 						onmouseleave={legendLeave}
-						use:tippyTooltip={{
+						use:evervizFloatingTooltip={{
 							getContent: () => dotTooltip("", "All respondents", row.all),
 							accentColor: "var(--iqdot-all-bar)",
-							options: tippyOptions,
+							options: tooltipOptions,
 						}}
 					/>
 				</g>
@@ -323,13 +322,13 @@
 						style:pointer-events="all"
 						onmouseenter={() => legendEnter(s.key)}
 						onmouseleave={legendLeave}
-						use:tippyTooltip={{
+						use:evervizFloatingTooltip={{
 							getContent: () =>
 								dotTooltip(s.group ?? "", s.label, v),
 							accentColor: s.muted
 								? "var(--iqdot-muted-dot)"
 								: s.color,
-							options: tippyOptions,
+							options: tooltipOptions,
 						}}
 					/>
 				{/if}
