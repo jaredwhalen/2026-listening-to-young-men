@@ -448,20 +448,6 @@
 		outline-offset: 2px;
 	}
 
-	.compare {
-		display: grid;
-		/* gap: 3rem; */
-		/* Fallback trait column width; JS will set a tighter px value */
-		--trait-col: clamp(8rem, 18vw, 13rem);
-	}
-
-	@media (min-width: 980px) {
-		.compare {
-			grid-template-columns: 1fr 1fr;
-			align-items: start;
-		}
-	}
-
 	.chart-label {
 		margin: 0 0 0.5rem;
 		font-family: var(--font-body);

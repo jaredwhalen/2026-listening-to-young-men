@@ -36,3 +36,23 @@
 	font-weight: var(--chart-weight-semibold, 650);
 }
 
+/* Side-by-side heatmaps on the waffle route; single column + spacing when stacked */
+.compare {
+	display: grid;
+	/* Fallback trait column width; JS may set a tighter px value */
+	--trait-col: clamp(8rem, 18vw, 13rem);
+}
+
+@media (max-width: 979.98px) {
+	.compare {
+		gap: 2rem;
+	}
+}
+
+@media (min-width: 980px) {
+	.compare {
+		grid-template-columns: 1fr 1fr;
+		align-items: start;
+	}
+}
+
