@@ -479,13 +479,6 @@
 		line-height: 1.45;
 	}
 
-	.iq-code {
-		font-size: 0.88em;
-		padding: 0.08em 0.28em;
-		border-radius: 0.2rem;
-		background: var(--color-gray-100);
-	}
-
 	.iq-landing {
 		max-width: 46rem;
 		margin: 0.25rem auto 1.25rem;
@@ -551,10 +544,6 @@
 		min-width: 0;
 	}
 
-	.iq-field--grow {
-		flex: 1 1 14rem;
-	}
-
 	.iq-field-label {
 		font-family: var(--chart-font-body, var(--font-body));
 		font-size: var(--chart-fs-xs, 12px);
@@ -562,18 +551,6 @@
 		color: var(--chart-muted, var(--color-text-muted));
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-	}
-
-	.iq-select {
-		font-family: var(--chart-font-body, var(--font-body));
-		font-size: var(--chart-fs-sm, 14px);
-		padding: 0.35rem 0.5rem;
-		border: 1px solid var(--color-border);
-		border-radius: var(--chart-radius, 3px);
-		background: var(--color-surface);
-		color: var(--color-text);
-		min-width: 0;
-		max-width: 100%;
 	}
 
 	.iq-field--seg {
@@ -729,8 +706,6 @@
 		outline-offset: 2px;
 	}
 
-	/* question/subpart labels are now handled by the title dropdown */
-
 	@media (max-width: 720px) {
 		.iq-title-picker {
 			max-width: 100%;
@@ -745,7 +720,6 @@
 			width: fit-content;
 		}
 
-		/* InteractiveMultiDotPlot: smaller plot glyphs on narrow viewports */
 		.dotplot-interactive-plot :global(.iqdot-svg circle.iqdot-dot) {
 			r: 7px;
 		}

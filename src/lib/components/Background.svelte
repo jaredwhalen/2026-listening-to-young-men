@@ -7,11 +7,6 @@
 	let label = $derived(
 		humanIndex != null && slideCount > 0 ? `${humanIndex} of ${slideCount}` : '—'
 	);
-
-	$effect(() => {
-		if (typeof slideIndex !== 'number' || slideCount <= 0) return;
-		console.log(`[Background] ${slideIndex + 1} of ${slideCount}`);
-	});
 </script>
 
 <div class="background-root">

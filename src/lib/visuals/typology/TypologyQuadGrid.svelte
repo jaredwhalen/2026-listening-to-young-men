@@ -285,10 +285,7 @@
 
 	.quad-card {
 		box-sizing: border-box;
-		// background: var(--matrix-surface);
 		background: var(--color-gray-100);
-		// border: 1px solid var(--matrix-border);
-		// border-radius: 0.45rem;
 		padding: 0.95rem 1rem 1rem;
 		min-width: 0;
 		display: flex;
@@ -420,18 +417,6 @@
 		font-weight: 400;
 		font-size: 12px;
 		line-height: 1.4;
-	}
-
-	.quad-sub {
-		margin: 0;
-		font-family: var(--chart-font-body, var(--font-body));
-		font-size: var(--chart-fs-xs, 11px);
-		font-style: italic;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: var(--matrix-heading-soft);
-		border-top: 1px solid var(--matrix-border);
-		padding-top: 0.5rem;
 	}
 
 	/**

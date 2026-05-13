@@ -27,9 +27,6 @@
 	/** 20px diameter */
 	const dotR = 10;
 	const allDiamondHalf = 8;
-	const allTickHalf = 9;
-	/** Stroke width (px) for “All respondents” tick on the scale */
-	const allTickW = 2;
 
 	const W = $derived(Math.max(300, containerW || 0));
 	const labelMaxW = $derived(Math.min(360, Math.floor(W * 0.48)));

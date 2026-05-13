@@ -1,9 +1,8 @@
 <script>
 	const routes = [
-		{ href: '/typology', label: 'Typology (inline)' },
+		{ href: '/typology', label: 'Typology' },
 		{ href: '/waffle', label: 'Waffle' },
-		{ href: '/dotplot', label: 'Dot plot' },
-		{ href: '/dotplot-interactive', label: 'Dot plot (interactive)' },
+		{ href: '/dotplot-interactive', label: 'Dot plot' },
 		{ href: '/section-quiz', label: 'Section quiz' }
 	];
 </script>
