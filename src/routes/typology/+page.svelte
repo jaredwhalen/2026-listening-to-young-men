@@ -5,8 +5,18 @@
 	import { typologyCopy } from '$lib/data/typologyCopy.js';
 	import typologyRows from '$lib/data/typology.csv';
 	import copy from '$lib/data/copy.json';
+	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 
 	const parsed = parseTypologyCsv(typologyRows);
+
+	/**
+	 * Static export view: hide “More info” and show brand mark on each quadrant.
+	 * Query param is read in the browser only (not available during prerender).
+	 */
+	const staticView = $derived(
+		browser ? $page.url.searchParams.has('static') : false,
+	);
 </script>
 
 <svelte:head>
@@ -24,6 +34,7 @@
 					columnPcts={parsed.columnPcts}
 					rowPcts={parsed.rowPcts}
 					copy={typologyCopy}
+					staticView={staticView}
 				/>
 			{:else}
 				<p class="err" role="alert">Could not load typology data: {parsed.error}</p>

@@ -13,10 +13,11 @@
 		colorForTypologyQuadrant,
 	} from "./typologyDemoColors.js";
 	import { evervizFloatingTooltip } from "$lib/utils/evervizFloatingTooltip.js";
+	import { base } from "$app/paths";
 
 	const ICONS = { Scale, Users, GraduationCap, Calendar };
 
-	let { quadrants, columnPcts, rowPcts, copy } = $props();
+	let { quadrants, columnPcts, rowPcts, copy, staticView = false } = $props();
 
 	function iconForAttribute(attributeName) {
 		const name = copy.iconByAttribute[attributeName] ?? "Users";
@@ -121,7 +122,11 @@
 			{@const summaryShort = shortDescriptionForQuadrant(q)}
 			{@const tipParams = summaryTooltipParams(q)}
 			{@const qHeadingId = headingIdForQuadrant(q)}
-			<section class="quad-card" aria-labelledby={qHeadingId}>
+			<section
+				class="quad-card"
+				class:quad-card--static={staticView}
+				aria-labelledby={qHeadingId}
+			>
 				<header class="quad-head">
 					<div class="quad-headline">
 						<h3 class="quad-title" id={qHeadingId} style:color={accent}>
@@ -140,7 +145,7 @@
 					</div>
 					{#if summaryShort}
 						<p class="quad-summary">
-							{@html summaryShort}{#if tipParams}{" "}<button
+							{@html summaryShort}{#if tipParams && !staticView}{" "}<button
 									type="button"
 									class="quad-info-tip"
 									style:color={accent}
@@ -210,6 +215,15 @@
 						{/each}
 					</ul>
 				</section>
+				{#if staticView}
+					<div class="quad-brand-mark">
+						<img
+							src="{base}/images/public-agenda.png"
+							alt="Public Agenda logo"
+							height="36"
+						/>
+					</div>
+				{/if}
 			</section>
 		{/each}
 	</div>
@@ -301,12 +315,33 @@
 
 	.quad-card {
 		box-sizing: border-box;
+		position: relative;
 		background: var(--color-gray-100);
 		padding: 0.95rem 1rem 1rem;
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+	}
+
+	.quad-card--static {
+		padding-bottom: 2.85rem;
+	}
+
+	.quad-brand-mark {
+		position: absolute;
+		left: 0.65rem;
+		bottom: 0.45rem;
+		pointer-events: none;
+		line-height: 0;
+	}
+
+	.quad-brand-mark img {
+		display: block;
+		height: 1.75rem;
+		width: auto;
+		max-width: min(9.5rem, 55%);
+		object-fit: contain;
 	}
 
 	/** One row: typology name | rule | share + context (editorial-style color split). */
