@@ -295,7 +295,6 @@
 
 <div
 	class="typologies-heatmap"
-	role="application"
 	bind:this={heatmapEl}
 	style:--trait-col-effective={traitColW ? `${traitColW}px` : undefined}
 >

@@ -303,7 +303,6 @@
 
 <div
 	class="heatmap"
-	role="application"
 	bind:this={heatmapEl}
 	style:--col-header-h={colHeaderH ? `${colHeaderH}px` : undefined}
 	style:--trait-col-effective={traitColW ? `${traitColW}px` : undefined}

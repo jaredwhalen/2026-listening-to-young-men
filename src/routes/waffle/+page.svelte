@@ -23,6 +23,12 @@
 	const TYPOLOGIES_CHART_LABEL_RELATIONAL = "Relational young men";
 	const TYPOLOGIES_CHART_LABEL_SELF_DRIVEN = "Self-driven young men";
 
+	/** Compare-area summary for screen readers (matches on-page charts). */
+	const WAFFLE_A11Y_REGION_DEMOGRAPHICS =
+		"Demographics waffle charts: two heatmaps side by side. Left: traits Americans believe society most values in men today. Right: traits they believe are most important for men to have today. Columns are audience groups, rows are traits; darker green means a higher percent. Sort from any column header.";
+	const WAFFLE_A11Y_REGION_TYPOLOGIES =
+		"Typology waffle charts for young men: two heatmaps side by side. Left: relational young men. Right: self-driven young men. Each chart shows what they value, what they believe society values, and the gap in percentage points; rows are traits. Sort from any column header.";
+
 	let viewMode = $state(VIEW_MODE.demographics);
 
 	let innerWidth = $state(0);
@@ -230,15 +236,20 @@
 				<p class="waffle-lead">{leadTypologies}</p>
 				<div
 					class="compare compare--typologies"
+					role="region"
+					aria-label={WAFFLE_A11Y_REGION_TYPOLOGIES}
 					style:--trait-col={traitColWidthTypologies
 						? `${traitColWidthTypologies}px`
 						: undefined}
 				>
 					<section
 						class="chart chart--left"
-						aria-label={TYPOLOGIES_CHART_LABEL_RELATIONAL}
+						aria-labelledby="waffle-chart-typologies-relational"
 					>
-						<p class="chart-label large">
+						<p
+							id="waffle-chart-typologies-relational"
+							class="chart-label large"
+						>
 							{TYPOLOGIES_CHART_LABEL_RELATIONAL}
 						</p>
 						<TypologyDiffHeatmap
@@ -261,9 +272,12 @@
 					</section>
 					<section
 						class="chart chart--right"
-						aria-label={TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}
+						aria-labelledby="waffle-chart-typologies-self-driven"
 					>
-						<p class="chart-label large">
+						<p
+							id="waffle-chart-typologies-self-driven"
+							class="chart-label large"
+						>
 							{TYPOLOGIES_CHART_LABEL_SELF_DRIVEN}
 						</p>
 						<TypologyDiffHeatmap
@@ -289,15 +303,20 @@
 				<p class="waffle-lead">{leadDemographics}</p>
 				<div
 					class="compare"
+					role="region"
+					aria-label={WAFFLE_A11Y_REGION_DEMOGRAPHICS}
 					style:--trait-col={traitColWidthDemographics
 						? `${traitColWidthDemographics}px`
 						: undefined}
 				>
 					<section
 						class="chart chart--left"
-						aria-label={`Demographics: ${demographicsHeatmapLabels[WAFFLE_TABLE.societyBelieves]}`}
+						aria-labelledby="waffle-chart-demographics-society"
 					>
-						<p class="chart-label large">
+						<p
+							id="waffle-chart-demographics-society"
+							class="chart-label large"
+						>
 							{demographicsHeatmapLabels[
 								WAFFLE_TABLE.societyBelieves
 							]}
@@ -328,9 +347,12 @@
 					</section>
 					<section
 						class="chart chart--right"
-						aria-label={`Demographics: ${demographicsHeatmapLabels[WAFFLE_TABLE.theyBelieve]}`}
+						aria-labelledby="waffle-chart-demographics-they"
 					>
-						<p class="chart-label large">
+						<p
+							id="waffle-chart-demographics-they"
+							class="chart-label large"
+						>
 							{demographicsHeatmapLabels[
 								WAFFLE_TABLE.theyBelieve
 							]}
